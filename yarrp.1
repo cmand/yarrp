@@ -1,0 +1,206 @@
+.\"
+.\" yarrp.1
+.\"
+.\" Author: Robert Beverly <rbeverly@cmand.org>
+.\"
+.\" Copyright (c) 2016-2018 Robert Beverly
+.\"                    All rights reserved
+.\"
+.\"
+.Dd October 24, 2018
+.Dt YARRP 1
+.Os
+.Sh NAME
+.Nm yarrp
+.Nd high-speed active IPv4/IPv6 topology prober
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl hvQT
+.Op Fl b Ar bgp_rib
+.Op Fl c Ar tr_count
+.Op Fl i Ar target_file
+.Op Fl m Ar max_ttl
+.Op Fl F Ar fill_ttl
+.Op Fl n Ar nbr_ttl
+.Op Fl o Ar outfile
+.Op Fl r Ar rate
+.Op Fl I Ar interface
+.Op Fl s Ar sequential
+.Op Fl S Ar seed
+.Op Fl p Ar dst_port
+.Op Fl t Ar tr_type
+.Op Fl E Ar instance
+.Op Fl M Ar src_mac
+.Op Fl G Ar dst_mac
+.Op Ar subnet(s)
+.Sh DESCRIPTION
+.Nm
+(Yelling at Random Routers Progressively) is a high-speed active
+traceroute-style topology discovery tool.  To achieve its high probing
+rates, 
+.Nm
+is stateless and randomizes the order of probed destinations and
+TTLs.  By spreading probes, 
+.Nm
+distributes load and attempts to avoid 
+various forms of rate-limiting.  Yarrp supports both IPv4 and IPv6
+and can send probes of any transport type (TCP, UDP-paris, or ICMP-paris).
+.Pp
+.Sh OPTIONS
+The set of IPv4 or IPv6 destination targets to probe may be specified
+in one of three ways:
+.Bl -tag -width Ds
+.It Ar subnet(s)
+Specify subnet(s) on command-line. A target in each /24 (IPv4), or
+each /48 (IPv6), of the subnets will be probed.
+.It Fl i Ar target_file
+Input list (one address per line) of explicit targets
+.It Fl Q
+Internet-wide scanning.  Probes a target in all /24 IPv4, or all /48 IPv6, 
+addresses (use with caution).
+.El
+.Pp
+The general options are as follows:
+.Bl -tag -width Ds
+.It Fl h
+print command line options and a synopsis of each.
+.It Fl v
+verbose (use multiple times to increase verbosity)
+.It Fl T
+test mode (default: off)
+.It Fl o Ar outfile
+output ytr file for probing results (default: output.yrp)
+.It Fl r Ar rate
+set packet per second probing rate (default: 10pps)
+.It Fl t Ar tr_type
+set probe type: TCP_ACK, TCP_SYN, UDP, ICMP, ICMP_REPLY (default: TCP_ACK)
+.It Fl c Ar tr_count
+set number of traces to issue (default: unlimited)
+.It Fl m Ar max_ttl
+set maximum TTL (default: 32)
+.It Fl F Ar fill_ttl
+set fill mode maximum TTL (default: 0)
+.It Fl n Ar nbr_ttl
+enable neighborhood enhancement and set local neighborhood TTL (default: off)
+.It Fl S Ar seed
+set permutation random seed (default: timestamp)
+.It Fl E Ar instance 
+set instance (default: 0)
+.It Fl p Ar dst_port
+use specified transport destination port (default: 80)
+.It Fl s
+send probes sequentially (default: random)
+.It Fl b Ar bgp_rib
+read BGP RIB (Potaroo text format) (default: none)
+.El
+.Pp
+The IPv6-specific options are as follows:
+.Bl -tag -width Ds
+.It Fl I Ar interface
+network interface to use (required)
+.It Fl t Ar tr_type
+set probe type: ICMP6, UDP6, TCP6_SYN, TCP6_ACK (required)
+.It Fl M Ar src_mac
+MAC address of source (required if auto discovery fails)
+.It Fl G Ar dst_mac
+MAC address of gateway router (required if auto discovery fails)
+.El
+.Sh OUTPUT
+.Nm 
+writes probe responses to the specified output file in a delimited
+ASCII format as they are received, one response per line.  Because
+.Nm
+randomizes its probing, results will be similarly randomized.
+To determine all of the responses for a single target destination, it
+is necessary to filter and collate responses.  The included
+yrp2warts.py python utility performs this reconstitution and produces output
+in the standard warts binary format.
+.Sh TTLs
+.Nm 
+By default, 
+.Nm
+randomly permutes the space of targets and TTLs,
+thereby probing each target with TTLs from 1 to max_ttl in a random
+order.  Three options modify this behavior.  The sequential option
+(-s) disables random probing and instead probes sequentially.  The nbr_ttl
+option (-n) is an optimization that stops probing low TTLs within the local
+neighborhood of the prober once 
+.Nm
+determines that it is not
+discovering any new interfaces within that neighborhood.  Finally, in
+fill mode (-F), 
+.Nm
+will probe, up to a maximum of fill_ttl, TTLs beyond
+max_ttl if and only if it receives a response for a probe with TTL
+greater than max_ttl.  
+.Sh EXAMPLES
+The command:
+.Pp
+.in +.3i
+yarrp -i targets -o test.yrp -r 100
+.in -.3i
+.Pp
+will send TCP_ACK topology probes in a randomly-permuted order to the IPv4 
+targets in file "targets" at a rate of 100pps, and write results to
+file "test.yrp".
+.Pp
+The command:
+.Pp
+.in +.3i
+yarrp -o scan.yrp -t ICMP -v -m 16 205.155.0.0/16
+.in -.3i
+.Pp
+will send ICMP topology probes in a randomly-permuted order to all
+destinations within the prefix 205.155.0.0/16, from TTL 1 to 16
+at the default rate of 10pps.  Verbosity is switched on so that
+.Nm
+will report probe and response data to stdout.  The results
+will be written to the file "scan.yrp".
+.Pp
+The command:
+.Pp
+.in +.3i
+yarrp -o scan2.yrp -t ICMP -b bgptable.txt 1.0.0.0/8
+.in -.3i
+.Pp
+will send ICMP topology probes in a randomly-permuted order to all
+destinations within the prefix 1.0.0.0/8, if the destination
+has a route in the BGP routing table "bgptable.txt".  The routing
+table file must be plain-text in Potaroo format (the most recent
+table is available from https://bgp.potaroo.net/as6447/bgptable.txt).
+The results will be written to the file "scan2.yrp".
+.Pp
+The command:
+.Pp
+.in +.3i
+yarrp -t UDP6 -I eth0 -i targets6 -o test6.yrp
+.in -.3i
+.Pp
+will send UDP probes in a randomly-permuted order to the set of
+IPv6 targets in the file "targets6", and write the results to the file 
+"test6.yrp".
+.Pp
+.in -.5i
+.Sh SEE ALSO
+.Xr yrp2warts.py 1
+.Xr warts2yrp.py 1
+.Rs
+.%A "R. Beverly"
+.%T "Yarrp'ing the Internet: Randomized High-Speed Active Topology Discovery"
+.%O "Proc. ACM/SIGCOMM Internet Measurement Conference 2016"
+.Re
+.Rs
+.%A "E. Gaston"
+.%T "High-frequency mapping of the IPv6 Internet using Yarrp"
+.%O "NPS Master's Thesis (http://hdl.handle.net/10945/52982), 2017"
+.Re
+.Rs
+.%A "R. Beverly, R. Durairajan, D. Plonka, and J.P. Rohrer"
+.%T "In the IP of the Beholder: Strategies for Active IPv6 Topology Discovery"
+.%O "Proc. ACM/SIGCOMM Internet Measurement Conference 2018"
+.Re
+.Sh AUTHORS
+.Nm
+is written by Robert Beverly <rbeverly@cmand.org>.  Ionut Luculescu contributed
+support for IPv4 UDP probing.  Eric Gaston contributed support for IPv6 probing.

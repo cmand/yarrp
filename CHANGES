@@ -1,0 +1,32 @@
+yarrp-0.5
+---------
+* Add fill mode
+* Support IPv6 on BSD
+* Support multiple simultaneous instances
+* Support ICMP echo reply probes
+
+yarrp-0.4
+---------
+* Multiple IPv6 fixes
+* Support IPv6 BGP tables
+* Support IPv4 ICMP probing
+* Add probe-to-end TTL enhancement
+* Microsecond timestamp support
+* Record permutation seed in output
+* Decoupled probing/receiving support 
+* Beta Internet6-wide probing support
+* Updated yrp2warts utilities
+
+yarrp-0.3
+---------
+* IPv6 support
+* Require libcperm
+
+yarrp-0.2
+---------
+* Support UDP probing
+* Configurable transport destination port
+
+yarrp-0.1
+---------
+* Initial public release

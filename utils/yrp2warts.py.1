@@ -1,0 +1,55 @@
+.\"
+.\" yarrp.1
+.\"
+.\" Author: Robert Beverly <rbeverly@cmand.org>
+.\"
+.\" Copyright (c) 2016 Robert Beverly
+.\"                    All rights reserved
+.\"
+.\"
+.Dd October 21, 2016
+.Dt YRP2WARTS.PY 1
+.Os
+.Sh NAME
+.Nm yrp2warts.py
+.Nd convert Yarrp format output to binary warts
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl h
+.Op Fl i Ar input
+.Op Fl o Ar output
+.Op Fl s Ar subnet
+.Sh DESCRIPTION
+.Nm
+converts Yarrp output files to the standard binary warts format (the
+native format for scamper).  Requires sc_warts_writer.py from 
+https://www.github.com/cmand/scamper.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl h
+prints a list of command line options and a synopsis of each.
+.It Fl i Ar input
+input Yarrp file
+.It Fl o Ar output
+output warts file
+.It Fl s Ar subnet
+optional filter to restrict conversion to a single subnet
+.El
+.Sh EXAMPLES
+The command:
+.Pp
+.in +.3i
+yrp2warts.py -i test.yrp -o test.warts
+.in -.3i
+.Pp
+will convert test.yrp, containing output from a Yarrp run, to a new
+warts formatted test.warts file.
+.Pp
+.in -.5i
+.Sh SEE ALSO
+.Xr yarrp 1
+.Sh AUTHORS
+.Nm
+is written by Robert Beverly <rbeverly@cmand.org>.

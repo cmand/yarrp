@@ -1,0 +1,4 @@
+#!/bin/sh
+# Wrapper to build run GNU autoconf tool chain on yarrp project
+set -x
+autoreconf -fviW all
