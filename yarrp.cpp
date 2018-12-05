@@ -12,6 +12,14 @@
  ***************************************************************************/
 #include "yarrp.h"
 
+
+double now(void)
+{
+	struct timeval now;
+	gettimeofday(&now, NULL);
+	return (double)now.tv_sec + (double)now.tv_usec / 1000000.;
+}
+
 template<class TYPE>
 void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace, 
           Patricia *tree, Stats *stats) {
@@ -22,6 +30,37 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
     Status *status = NULL;
     char ptarg[INET6_ADDRSTRLEN];
     double prob, flip;
+
+    // adaptive timing to hit target rate
+	uint64_t count = 0;
+	uint64_t last_count = count;
+	double last_time = now();
+	uint32_t delay = 0;
+	int interval = 0;
+	volatile int vi;
+	struct timespec ts, rem;
+	double send_rate = (double)config->rate;
+	const double slow_rate = 50; // packets per seconds per thread
+	// at which it uses the slow methods
+	long nsec_per_sec = 1000 * 1000 * 1000;
+	long long sleep_time = nsec_per_sec;
+
+	if (config->rate > 0) {
+		delay = 10000;
+		if (send_rate < slow_rate) {
+			// set the inital time difference
+			sleep_time = nsec_per_sec / send_rate;
+			last_time = now() - (1.0 / send_rate);
+		} else {
+			// estimate initial rate
+			for (vi = delay; vi--;)
+				;
+			delay *= 1 / (now() - last_time) /
+				 (config->rate);
+			interval = (config->rate) / 20;
+			last_time = now();
+		}
+	}
 
     stats->to_probe = iplist->count();
     while (true) {
@@ -99,10 +138,47 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
         {
             stats->terse();
         }
+
         /* Calculate sleep time based on scan rate */
         if (config->rate) {
-            usleep(1000000 / config->rate);
+               send_rate = (double)config->rate;
+               if (count && delay > 0) {
+                       if (send_rate < slow_rate) {
+                               double t = now();
+                               double last_rate = (1.0 / (t - last_time));
+
+                               sleep_time *= ((last_rate / send_rate) + 1) / 2;
+                               ts.tv_sec = sleep_time / nsec_per_sec;
+                               ts.tv_nsec = sleep_time % nsec_per_sec;
+                               while (nanosleep(&ts, &rem) == -1) {
+                               }
+                               last_time = t;
+                       } else {
+                               for (vi = delay; vi--;)
+                                       ;
+                               if (!interval || (count % interval == 0)) {
+                                       double t = now();
+                                       double multiplier =
+                                           (double)(count - last_count) /
+                                           (t - last_time) /
+                                           (config->rate);
+                                       uint32_t old_delay = delay;
+                                       delay *= multiplier;
+                                       if (delay == old_delay) {
+                                               if (multiplier > 1.0) {
+                                                       delay *= 2;
+                                               } else if (multiplier < 1.0) {
+                                                       delay *= 0.5;
+                                               }
+                                       }
+                                       last_count = count;
+                                       last_time = t;
+                               }
+                       }
+               }
         }
+        count = stats->count;
+
         /* Quit if we've exceeded probe count from command line */
         if (stats->count == config->count)
             break;
