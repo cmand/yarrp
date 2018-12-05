@@ -17,6 +17,7 @@
 .Nm
 .Bk -words
 .Op Fl hvQT
+.Op Fl a Ar ipv6_src
 .Op Fl b Ar bgp_rib
 .Op Fl c Ar tr_count
 .Op Fl i Ar target_file
@@ -101,6 +102,8 @@ The IPv6-specific options are as follows:
 network interface to use (required)
 .It Fl t Ar tr_type
 set probe type: ICMP6, UDP6, TCP6_SYN, TCP6_ACK (required)
+.It Fl a Ar ipv6_src
+set source IPv6 address (default: auto)
 .It Fl M Ar src_mac
 MAC address of source (required if auto discovery fails)
 .It Fl G Ar dst_mac
@@ -204,3 +207,4 @@ IPv6 targets in the file "targets6", and write the results to the file
 .Nm
 is written by Robert Beverly <rbeverly@cmand.org>.  Ionut Luculescu contributed
 support for IPv4 UDP probing.  Eric Gaston contributed support for IPv6 probing.
+Oliver Gasser contributed proper rate limiting patches.

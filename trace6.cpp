@@ -11,6 +11,8 @@ Traceroute6::Traceroute6(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
         source6.sin6_family = AF_INET6;
         if (inet_pton(AF_INET6, config->probesrc, &source6.sin6_addr) != 1)
           fatal("** Bad source address."); 
+    } else if (config->srcaddr != NULL) {
+         source6.sin6_addr = *config->srcaddr;
     } else {
         infer_my_ip6(&source6);
     }

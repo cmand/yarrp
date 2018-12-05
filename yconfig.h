@@ -4,7 +4,7 @@ class YarrpConfig {
     testing(false), entire(false), output(NULL), 
     bgpfile(NULL), inlist(NULL), count(0), maxttl(32), seed(0),
     dstport(80),
-    ipv6(false), int_name(NULL), dstmac(NULL), srcmac(NULL),
+    ipv6(false), int_name(NULL), dstmac(NULL), srcmac(NULL), srcaddr(NULL),
     coarse(false), fillmode(0), poisson(0),
     probesrc(NULL), probe(true), receive(true), instance(0) {};
 
@@ -26,6 +26,7 @@ class YarrpConfig {
   char *int_name;
   uint8_t *dstmac;
   uint8_t *srcmac;
+  struct in6_addr *srcaddr;
   int type;
   bool coarse;
   int fillmode;

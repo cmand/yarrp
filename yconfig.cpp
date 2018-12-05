@@ -8,6 +8,7 @@
 int verbosity;
 
 static struct option long_options[] = {
+    {"srcaddr", required_argument, NULL, 'a'},
     {"bgp", required_argument, NULL, 'b'},
     {"coarse", required_argument, NULL, 'C'},
     {"count", required_argument, NULL, 'c'},
@@ -43,6 +44,12 @@ uint8_t *read_mac(char *str) {
     return mac;
 }
 
+struct in6_addr *read_v6_src_addr(char *str) {
+    in6_addr *src = (in6_addr *) malloc(sizeof(in6_addr));
+    inet_pton(AF_INET6, str, src);
+    return src;
+}
+
 void
 YarrpConfig::parse_opts(int argc, char **argv) {
     int c, opt_index;
@@ -52,7 +59,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
         usage(argv[0]);
     type = TR_TCP_ACK;
     seed = time(NULL);
-    while (-1 != (c = getopt_long(argc, argv, "b:B:c:CE:F:G:hi:I:m:M:n:o:p:P:Qr:RsS:t:vT", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:m:M:n:o:p:P:Qr:RsS:t:vT", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
@@ -120,6 +127,9 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             break;
         case 'M':
             srcmac = read_mac(optarg);
+            break;
+        case 'a':
+            srcaddr = read_v6_src_addr(optarg);
             break;
         case 't':
             if (strcmp(optarg, "ICMP6") == 0) {
@@ -189,6 +199,7 @@ YarrpConfig::usage(char *prog) {
     << "  -T, --test              Don't send probes (default: off)" << endl
     << "  -Q, --entire            Entire IPv4/IPv6 Internet (default: off)" << endl
     << "  -I, --interface         Network interface (required for IPv6)" << endl
+    << "  -a, --srcaddr           IPv6 address of probing host (default: auto)" << endl
     << "  -G, --dstmac            MAC of gateway router (default: auto)" << endl
     << "  -M, --srcmac            MAC of probing host (default: auto)" << endl
     << "  -h, --help              Show this message" << endl
