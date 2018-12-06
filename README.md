@@ -9,5 +9,14 @@ interfaces in less than 5 minutes. Yarrp supports TCP, UDP-paris, and
 ICMP-paris probing over both IPv4 and IPv6. Yarrp is written in C++, runs on
 Linux and BSD systems, and is open-sourced with a BSD license.
 
-### Technical details:
-  https://www.cmand.org/yarrp 
+## Build
+
+```shell
+./bootstrap
+./configure
+make
+```
+
+## Technical details
+
+* See https://www.cmand.org/yarrp
