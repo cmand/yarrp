@@ -116,6 +116,7 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     /* Populate a yarrp payload */
     payload->ttl = ttl;
     payload->fudge = 0;
+    payload->target = addr;
     uint32_t diff = elapsed();
     payload->diff = diff;
     u_char *data = (u_char *)(frame + ETH_HDRLEN + sizeof(ip6_hdr) 

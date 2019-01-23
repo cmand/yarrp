@@ -15,6 +15,7 @@ static const char *Tr_Type_String[] = {"ICMP6", "ICMP", "UDP6", "UDP",
 /* Payload for IPv6 Yarrp probes */
 struct ypayload {
     uint32_t id;      /* "yrp6" = 0x79 72 70 36 */
+    struct in6_addr target; /* v6 target address, to detect spoofed responses */
     uint8_t instance; /* instance */
     uint8_t ttl;      /* sent TTL */
     uint16_t fudge;   /* make chksum constant */

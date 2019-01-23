@@ -59,4 +59,5 @@ class ICMP6 : public ICMP {
     private:
     struct ip6_hdr *quote;
     struct in6_addr ip_src;
+    struct in6_addr *yarrp_target;
 };

@@ -111,6 +111,7 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, struct ypayload *qpaylo
     replyttl = ip->ip6_hlim;
     ttl = qpayload->ttl;
     instance = qpayload->instance;
+    yarrp_target = &(qpayload->target);
     uint32_t diff = qpayload->diff;
     unsigned char *ptr = NULL;
     if (elapsed >= diff)
@@ -118,7 +119,7 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, struct ypayload *qpaylo
     else
         cerr << "** RTT decode, elapsed: " << elapsed << " encoded: " << diff << endl;
 
-    /* ICMP6 echo replies (ie if we hit the target) don't contain quote */
+    /* ICMP6 echo replies only quote the yarrp payload, not the full packet! */
     quote = NULL;
     if (((type == ICMP6_TIME_EXCEEDED) and (code == ICMP6_TIME_EXCEED_TRANSIT)) or
         (type == ICMP6_DST_UNREACH)) {
@@ -249,7 +250,15 @@ void ICMP6::write(FILE ** out, uint32_t count) {
     if (((type == ICMP6_TIME_EXCEEDED) and (code == ICMP6_TIME_EXCEED_TRANSIT)) or
     (type == ICMP6_DST_UNREACH)) { 
         inet_ntop(AF_INET6, &(quote->ip6_dst.s6_addr), target, INET6_ADDRSTRLEN);
-    } else {
+    } 
+    /* In the case of an ECHO REPLY, the quote does not contain the invoking
+     * packet, so we rely on the target as encoded in the yarrp payload */
+    else if (type == ICMP6_ECHO_REPLY) {
+        inet_ntop(AF_INET6, yarrp_target, target, INET6_ADDRSTRLEN);
+    } 
+    /* If we don't know what else to do, assume that source of the packet
+     * was the target */
+    else {
         inet_ntop(AF_INET6, &ip_src, target, INET6_ADDRSTRLEN);
     }
     ICMP::write(out, count, src, target);
