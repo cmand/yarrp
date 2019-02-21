@@ -152,6 +152,8 @@ YarrpConfig::parse_opts(int argc, char **argv) {
                 type = TR_UDP;
             } else if(strcmp(optarg, "TCP_SYN") == 0) {
                 type = TR_TCP_SYN;
+            } else if(strcmp(optarg, "TCP_ACK") == 0) {
+                type = TR_TCP_ACK;
             } else {
                 usage(argv[0]);
             }
