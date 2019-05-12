@@ -56,7 +56,7 @@ void *listener6(void *args) {
 
 #ifdef _LINUX
     if ((rcvsock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
-        cout << "yarrp listener socket error:" << strerror(errno) << endl;
+        cerr << "yarrp listener socket error:" << strerror(errno) << endl;
     }
 #else
     /* Init BPF */
@@ -78,8 +78,8 @@ void *listener6(void *args) {
         n = select(rcvsock + 1, &rfds, NULL, NULL, &timeout);
         if (n == 0) {
             nullreads++;
-            cout << ">> Listener: timeout " << nullreads;
-            cout << "/" << MAXNULLREADS << endl;
+            cerr << ">> Listener: timeout " << nullreads;
+            cerr << "/" << MAXNULLREADS << endl;
             continue;
         }
 	if (n == -1) {

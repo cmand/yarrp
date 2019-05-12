@@ -27,7 +27,7 @@ listener(void *args) {
     int rcvsock; /* receive (icmp) socket file descriptor */
 
     if ((rcvsock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
-        cout << "yarrp listener socket error:" << strerror(errno) << endl;
+        cerr << "yarrp listener socket error:" << strerror(errno) << endl;
     }
 
     while (true) {
@@ -41,8 +41,8 @@ listener(void *args) {
         /* only timeout if we're also probing (not listen-only mode) */
         if ((n == 0) and (trace->config->probe)) {
             nullreads++;
-            cout << ">> Listener: timeout " << nullreads;
-            cout << "/" << MAXNULLREADS << endl;
+            cerr << ">> Listener: timeout " << nullreads;
+            cerr << "/" << MAXNULLREADS << endl;
             continue;
         }
         if (n > 0) {

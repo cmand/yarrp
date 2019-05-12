@@ -60,7 +60,10 @@ Traceroute::elapsed() {
 void
 Traceroute::openOutput(const char *src) {
     debug(DEBUG, ">> Output: " << config->output);
-    out = fopen(config->output, "a");
+    if ( (config->output)[0] == '-')
+      out = stdout;
+    else
+      out = fopen(config->output, "a");
     if (out == NULL)
         fatal("%s: %s", __func__, strerror(errno));
 #ifdef GITREV
