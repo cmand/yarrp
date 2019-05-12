@@ -25,13 +25,13 @@ class Stats {
       float t = (float) tsdiff(&end, &start) / 1000.0;
       fprintf(out, "#\n# Probing statistics\n");
       fprintf(out, "# Current TS: %s", ctime(&(end.tv_sec)));  
-      fprintf(out, "# Bad response: %d\n", baddst);
-      fprintf(out, "# Fills: %d\n", fills);
-      fprintf(out, "# Outside: [%d/%d/%d] (ttl/bgp/address)\n",
+      fprintf(out, "# Bad response: %u\n", baddst);
+      fprintf(out, "# Fills: %u\n", fills);
+      fprintf(out, "# Outside: [%u/%u/%u] (ttl/bgp/address)\n",
           ttl_outside, bgp_outside, adr_outside);
-      fprintf(out, "# Skipped: [%d/%d] (neighbor/bgp)\n",
+      fprintf(out, "# Skipped: [%u/%u] (neighbor/bgp)\n",
           nbr_skipped, bgp_skipped);
-      fprintf(out, "# Pkts: %d In: %2.2fs (Approx: %2.2f p/sec)\n", 
+      fprintf(out, "# Pkts: %u In: %2.2fs (Approx: %2.2f p/sec)\n", 
           count, t, (float) count / t);
     };
     
