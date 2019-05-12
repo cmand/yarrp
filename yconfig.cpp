@@ -189,9 +189,9 @@ YarrpConfig::usage(char *prog) {
     << "  -t, --type              Probe type: ICMP, ICMP_REPLY, TCP_SYN, TCP_ACK, UDP," << endl
     << "                                      ICMP6, UDP6, TCP6_SYN, TCP6_ACK (default: TCP_ACK)" << endl
     << "  -r, --rate              Scan rate in pps (default: 10)" << endl
-    << "  -m, --maxttl            Maximum TTL (for ip input list only)" << endl
+    << "  -m, --maxttl            Maximum TTL (default: 16)" << endl
     << "  -v, --verbose           verbose (default: off)" << endl
-    << "  -F, --fillmode          Fill mode maxttl (default: 0)" << endl
+    << "  -F, --fillmode          Fill mode maxttl (default: 32)" << endl
     << "  -s, --sequential        Scan sequentially (default: random)" << endl
     << "  -n, --neighborhood      Neighborhood TTL (default: 0)" << endl
     << "  -b, --bgp               BGP table (default: none)" << endl

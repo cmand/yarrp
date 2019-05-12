@@ -69,7 +69,7 @@ listener(void *args) {
                 /* Fill mode logic. */
                 if (trace->config->fillmode) {
                     if ( (icmp->getTTL() >= trace->config->maxttl) and
-                         (icmp->getTTL() < trace->config->fillmode) ) {
+                         (icmp->getTTL() <= trace->config->fillmode) ) {
                         trace->stats->fills+=1;
                         trace->probe(icmp->quoteDst(), icmp->getTTL() + 1); 
                     }

@@ -7,7 +7,7 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd December 5, 2018
+.Dd May 12, 2019
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -79,9 +79,9 @@ set probe type: TCP_ACK, TCP_SYN, UDP, ICMP, ICMP_REPLY (default: TCP_ACK)
 .It Fl c Ar tr_count
 set number of traces to issue (default: unlimited)
 .It Fl m Ar max_ttl
-set maximum TTL (default: 32)
+set maximum TTL (default: 16)
 .It Fl F Ar fill_ttl
-set fill mode maximum TTL (default: 0)
+set fill mode maximum TTL (default: 32)
 .It Fl n Ar nbr_ttl
 enable neighborhood enhancement and set local neighborhood TTL (default: off)
 .It Fl S Ar seed
@@ -134,9 +134,10 @@ determines that it is not
 discovering any new interfaces within that neighborhood.  Finally, in
 fill mode (-F), 
 .Nm
-will probe, up to a maximum of fill_ttl, TTLs beyond
-max_ttl if and only if it receives a response for a probe with TTL
-greater than max_ttl.  
+yarrp will probe, up to a maximum TTL of fill_ttl, the next
+hop beyond
+max_ttl if it receives a response for a probe with TTL
+greater than or equal to max_ttl.  
 .Sh EXAMPLES
 The command:
 .Pp
