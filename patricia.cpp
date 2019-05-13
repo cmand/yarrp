@@ -996,27 +996,40 @@ void *Patricia::get(struct in6_addr addr) {
     return get(prefix, false);
 }
 
-void Patricia::matchingPrefix(prefix_t *prefix) {
+int Patricia::matchingPrefix(prefix_t *prefix) {
     patricia_node_t *node = patricia_search_best(tree, prefix);
     char prefix_str[1500];
-    prefix_toa2x(prefix, prefix_str, false);
-    std::cout << ">> " << prefix_str << " ";
+    prefix_toa2x(prefix, prefix_str, true);
+    std::cout << __func__ << ">> " << prefix_str << " ";
+    int *asn;
     if (node) {
-        prefix_toa2x(node->prefix, prefix_str, true);
-        std::cout << "prefix: " << prefix_str << std::endl;
+        //prefix_toa2x(node->prefix, prefix_str, true);
+        asn = (int *) node->user1;
+        std::cout << "value: " << *asn << std::endl;
+        return *asn;
     } else {
         std::cout << "matches no prefix." << std::endl;
+        return -1;
     }
 }
 
-void Patricia::matchingPrefix(uint32_t addr) {
+int Patricia::matchingPrefix(uint32_t addr) {
     prefix_t *prefix = int2prefix(addr);
-    matchingPrefix(prefix);
+    return matchingPrefix(prefix);
 }
 
-void Patricia::matchingPrefix(const char *string) {
+int Patricia::matchingPrefix(const char *string) {
     prefix_t *prefix = ascii2prefix(AF_INET, string);
-    matchingPrefix(prefix);
+    return matchingPrefix(prefix);
+}
+
+int Patricia::parsePrefix(char *_line, std::string *net) {
+    std::string line(_line);
+    std::string::size_type first, last;
+    first = line.find_first_not_of(' ');
+    last = line.find_last_not_of(' ');
+    *net = line.substr(first,last);
+    return 1;
 }
 
 int Patricia::parseBGPLine(char *_line, std::string *net, uint32_t *asn) {
@@ -1026,9 +1039,9 @@ int Patricia::parseBGPLine(char *_line, std::string *net, uint32_t *asn) {
     first_space = line.find(' ', first_non_white);
     last_space = line.rfind(' ');
     if (line.find('>') != std::string::npos) {
-        *net = line.substr(first_non_white+1,first_space);
+        *net = line.substr(first_non_white+1,first_space-1);
     } else {
-        *net = line.substr(first_non_white,first_space);
+        *net = line.substr(first_non_white,first_space-1);
     }
     std::string asn_str = line.substr(last_space);
     asn_str = asn_str.substr(0,asn_str.length()-1);
@@ -1039,6 +1052,14 @@ int Patricia::parseBGPLine(char *_line, std::string *net, uint32_t *asn) {
 }
 
 void Patricia::populate(int family, const char *filename) {
+    populate(family, filename, false);
+}
+
+void Patricia::populateBlock(int family, const char *filename) {
+    populate(family, filename, true);
+}
+
+void Patricia::populate(int family, const char *filename, bool block) {
     gzFile f = gzopen(filename, "r");
     assert(f);
     char line[MAXLINE];
@@ -1046,9 +1067,20 @@ void Patricia::populate(int family, const char *filename) {
     uint32_t asn;
     while (!gzeof(f)) {
         if (gzgets(f, line, MAXLINE) == NULL) break;
-        if (parseBGPLine(line, &network, &asn)) {
-            //std::cout << "Prefix: " << network << " ASN: " << asn << std::endl;
-            add(family, network.c_str(), asn); 
+        if (block) {
+            if (parsePrefix(line, &network)) {
+                std::cout << "Block Prefix: " << network << std::endl;
+                add(family, network.c_str(), 0); 
+            }
+        } else {
+            if (parseBGPLine(line, &network, &asn)) {
+                std::cout << "Prefix: " << network << " ASN: " << asn << std::endl;
+                // lookup first, make sure prefix isn't contained in a prefix we're blocking
+                int asn = matchingPrefix(network.c_str());
+                std::cout << "Check for block: " << asn << std::endl;
+                if (asn != 0) 
+                  add(family, network.c_str(), asn); 
+            }
         }
     }
     gzclose(f);

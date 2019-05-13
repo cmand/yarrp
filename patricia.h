@@ -182,6 +182,8 @@ class Patricia {
         return (get(family, string, false));
     }
     void populate(int family, const char *filename);
+    void populate(int family, const char *filename, bool block);
+    void populateBlock(int family, const char *filename);
     void populate(const char *filename) {
         populate(AF_INET, filename);
     };
@@ -189,13 +191,14 @@ class Patricia {
         populate(AF_INET6, filename);
     };
     void populateStatus(const char *filename);
-    void matchingPrefix(uint32_t addr);
-    void matchingPrefix(const char *string);
+    int matchingPrefix(uint32_t addr);
+    int matchingPrefix(const char *string);
 
     private:
     int parseBGPLine(char *, std::string *, uint32_t *);
+    int parsePrefix(char *, std::string *);
     void *get(prefix_t *prefix, bool exact);
-    void matchingPrefix(prefix_t *prefix);
+    int matchingPrefix(prefix_t *prefix);
     patricia_tree_t *tree;
 };
 

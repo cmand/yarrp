@@ -2,7 +2,8 @@ class YarrpConfig {
   public:
   YarrpConfig() : rate(10), random_scan(true), ttl_neighborhood(0),
     testing(false), entire(false), output(NULL), 
-    bgpfile(NULL), inlist(NULL), count(0), maxttl(16), seed(0),
+    bgpfile(NULL), inlist(NULL), blocklist(NULL),
+    count(0), maxttl(16), seed(0),
     dstport(80),
     ipv6(false), int_name(NULL), dstmac(NULL), srcmac(NULL), srcaddr(NULL),
     coarse(false), fillmode(32), poisson(0),
@@ -18,6 +19,7 @@ class YarrpConfig {
   char *output;
   char *bgpfile;
   char *inlist;
+  char *blocklist;
   uint32_t count;
   uint8_t maxttl;
   uint32_t seed;

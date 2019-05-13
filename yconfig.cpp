@@ -10,10 +10,11 @@ int verbosity;
 static struct option long_options[] = {
     {"srcaddr", required_argument, NULL, 'a'},
     {"bgp", required_argument, NULL, 'b'},
+    {"blocklist", required_argument, NULL, 'B'},
     {"coarse", required_argument, NULL, 'C'},
     {"count", required_argument, NULL, 'c'},
     {"fillmode", required_argument, NULL, 'F'},
-    {"poisson", required_argument, NULL, 'B'},
+    {"poisson", required_argument, NULL, 'Z'},
     {"srcmac", required_argument, NULL, 'M'},
     {"help", no_argument, NULL, 'h'},
     {"input", required_argument, NULL, 'i'},
@@ -59,12 +60,15 @@ YarrpConfig::parse_opts(int argc, char **argv) {
         usage(argv[0]);
     type = TR_TCP_ACK;
     seed = time(NULL);
-    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:m:M:n:o:p:P:Qr:RsS:t:vT", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:m:M:n:o:p:P:Qr:RsS:t:vTZ:", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
             break;
         case 'B':
+            blocklist = optarg;
+            break;
+        case 'Z':
             poisson = strtol(optarg, &endptr, 10);
             break;
         case 'C':
@@ -195,6 +199,7 @@ YarrpConfig::usage(char *prog) {
     << "  -s, --sequential        Scan sequentially (default: random)" << endl
     << "  -n, --neighborhood      Neighborhood TTL (default: 0)" << endl
     << "  -b, --bgp               BGP table (default: none)" << endl
+    << "  -B, --blocklist         Prefix Blocklist (default: none)" << endl
     << "  -S, --seed              Seed (default: random)" << endl
     << "  -p, --port              Transport dst port (default: 80)" << endl
     << "  -E, --instance          Prober instance (default: 0)" << endl
@@ -207,7 +212,7 @@ YarrpConfig::usage(char *prog) {
     << "  -h, --help              Show this message" << endl
 /* Undocumented options */
 //    << "  -C, --coarse            Coarse ms timestamps (default: us)" << endl
-//    << "  -B, --poisson           Poisson TTLs (default: uniform)" << endl
+//    << "  -Z, --poisson           Poisson TTLs (default: uniform)" << endl
 //    << "  -P, --probeonly         Probe only, don't receive" << endl
 //    << "  -R, --receiveonly       Receive only, don't probe" << endl
     << "Targets:" << endl

@@ -30,6 +30,7 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
     Status *status = NULL;
     char ptarg[INET6_ADDRSTRLEN];
     double prob, flip;
+    int *asn;
 
     // adaptive timing to hit target rate
 	uint64_t count = 0;
@@ -91,7 +92,7 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
             ttlhisto->probed(trace->elapsed());
         }
         /* Only send probe if destination is in BGP table */
-        if (config->bgpfile) {
+        if (config->bgpfile or config->blocklist) {
             if (config->ipv6) {
                 if (tree->get(target6) == NULL) {
                     inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
@@ -100,22 +101,27 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
                     continue;
                 }
             } else {
+                asn = (int *) tree->get(target.s_addr);
+                inet_ntop(AF_INET, &target, ptarg, INET6_ADDRSTRLEN);
+                if (asn == NULL) {
+                    cout << "BGP Skip: " << ptarg << " TTL: " << (int)ttl << endl;
+                    stats->bgp_outside++;
+                    continue;
+                }
+                cout << "Prefix: " << ptarg << " ASN: " << *asn << endl;
+                if (*asn == 0) {
+                    cout << "In block: " << ptarg << " TTL: " << (int)ttl << endl;
+                    continue;
+                }
+            /*
                 status = (Status *) tree->get(target.s_addr);
                 if (status) {
-                    /* RB: remove this more complicated skipping logic for IMC
-                    tree->matchingPrefix(target.s_addr);
-                    status->print();
-                    if (status->shouldProbe() == false) {
-                        cout << "BGP Skip: " << inet_ntoa(target) << " TTL: " << (int)ttl << endl;
-                        stats->bgp_skipped++;
-                        continue;
-                    }
-                    */
                     status->probed(ttl, trace->elapsed());
                 } else {
                     stats->bgp_outside++;
                     continue;
                 }
+            */
             }
         }
         /* Passed all checks, continue and send probe */
@@ -245,15 +251,24 @@ main(int argc, char **argv) {
 
     /* Initialize radix trie, if using */
     Patricia *tree = NULL;
-    if (config.bgpfile) {
+    if (config.bgpfile or config.blocklist) {
         if (config.ipv6) {
             debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
             tree = new Patricia(128);
             tree->populate6(config.bgpfile);
         } else {
-            debug(LOW, ">> Populating IPv4 trie from: " << config.bgpfile);
             tree = new Patricia(32);
-            tree->populateStatus(config.bgpfile);
+            if (config.blocklist) {
+                debug(LOW, ">> Populating IPv4 blocklist: " << config.blocklist);
+                tree->populateBlock(AF_INET, config.blocklist);
+            }
+            if (config.bgpfile) {
+                debug(LOW, ">> Populating IPv4 trie from: " << config.bgpfile);
+                //tree->populateStatus(config.bgpfile);
+                tree->populate(config.bgpfile);
+            } else {
+                tree->add("0.0.0.0/0", 1);
+            }
         }
     }
 
