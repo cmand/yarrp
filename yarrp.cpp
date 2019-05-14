@@ -104,16 +104,17 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
                 asn = (int *) tree->get(target.s_addr);
                 inet_ntop(AF_INET, &target, ptarg, INET6_ADDRSTRLEN);
                 if (asn == NULL) {
-                    cout << "BGP Skip: " << ptarg << " TTL: " << (int)ttl << endl;
+                    debug(HIGH, ">> BGP Skip: " << ptarg << " TTL: " << (int)ttl);
                     stats->bgp_outside++;
                     continue;
                 }
-                cout << "Prefix: " << ptarg << " ASN: " << *asn << endl;
                 if (*asn == 0) {
-                    cout << "In block: " << ptarg << " TTL: " << (int)ttl << endl;
+                    debug(HIGH, ">> Address in blocklist: " << ptarg << " TTL: " << (int)ttl);
                     continue;
+                } else {
+                    debug(DEBUG, ">> Prefix: " << ptarg << " ASN: " << *asn);
                 }
-            /*
+#if 0
                 status = (Status *) tree->get(target.s_addr);
                 if (status) {
                     status->probed(ttl, trace->elapsed());
@@ -121,7 +122,7 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
                     stats->bgp_outside++;
                     continue;
                 }
-            */
+#endif
             }
         }
         /* Passed all checks, continue and send probe */

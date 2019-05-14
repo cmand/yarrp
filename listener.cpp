@@ -75,6 +75,7 @@ listener(void *args) {
                     }
                 }
                 icmp->write(&(trace->out), trace->stats->count);
+#if 0
                 Status *status = NULL;
                 if (trace->tree != NULL) 
                     status = (Status *) trace->tree->get(icmp->quoteDst());
@@ -82,6 +83,7 @@ listener(void *args) {
                     status->result(icmp->quoteTTL(), elapsed);
                     //status->print();
                 }
+#endif
                 /* TTL tree histogram */
                 if (trace->ttlhisto.size() > icmp->quoteTTL()) {
                     /* make certain we received a valid reply before adding  */

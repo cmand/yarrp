@@ -998,17 +998,16 @@ void *Patricia::get(struct in6_addr addr) {
 
 int Patricia::matchingPrefix(prefix_t *prefix) {
     patricia_node_t *node = patricia_search_best(tree, prefix);
-    char prefix_str[1500];
+    static char prefix_str[1500];
     prefix_toa2x(prefix, prefix_str, true);
-    std::cout << __func__ << ">> " << prefix_str << " ";
+    //std::cout << __func__ << ">> " << prefix_str << " ";
     int *asn;
     if (node) {
-        //prefix_toa2x(node->prefix, prefix_str, true);
         asn = (int *) node->user1;
-        std::cout << "value: " << *asn << std::endl;
+        //std::cout << "value: " << *asn << std::endl;
         return *asn;
     } else {
-        std::cout << "matches no prefix." << std::endl;
+        //std::cout << "matches no prefix." << std::endl;
         return -1;
     }
 }
@@ -1059,6 +1058,10 @@ void Patricia::populateBlock(int family, const char *filename) {
     populate(family, filename, true);
 }
 
+/*  we have two types of entries in the table:
+ *  0 => prefix is blacklisted
+ *  ASN => prefix's AS number
+ */
 void Patricia::populate(int family, const char *filename, bool block) {
     gzFile f = gzopen(filename, "r");
     assert(f);
@@ -1069,16 +1072,14 @@ void Patricia::populate(int family, const char *filename, bool block) {
         if (gzgets(f, line, MAXLINE) == NULL) break;
         if (block) {
             if (parsePrefix(line, &network)) {
-                std::cout << "Block Prefix: " << network << std::endl;
+                //std::cout << "Block Prefix: " << network << std::endl;
                 add(family, network.c_str(), 0); 
             }
         } else {
             if (parseBGPLine(line, &network, &asn)) {
-                std::cout << "Prefix: " << network << " ASN: " << asn << std::endl;
-                // lookup first, make sure prefix isn't contained in a prefix we're blocking
-                int asn = matchingPrefix(network.c_str());
-                std::cout << "Check for block: " << asn << std::endl;
-                if (asn != 0) 
+                //std::cout << "Prefix: " << network << " ASN: " << asn << std::endl;
+                // lookup first, ensure prefix isn't contained in a blacklistd prefix
+                if ( matchingPrefix(network.c_str()) != 0 )
                   add(family, network.c_str(), asn); 
             }
         }
