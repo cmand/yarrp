@@ -19,6 +19,7 @@
 .Op Fl hvQT
 .Op Fl a Ar ipv6_src
 .Op Fl b Ar bgp_rib
+.Op Fl B Ar blocklist
 .Op Fl c Ar tr_count
 .Op Fl i Ar target_file
 .Op Fl m Ar max_ttl
@@ -94,6 +95,8 @@ use specified transport destination port (default: 80)
 send probes sequentially (default: random)
 .It Fl b Ar bgp_rib
 read BGP RIB (Potaroo text format) (default: none)
+.It Fl B Ar blocklist
+read list of prefixes to skip (default: none)
 .El
 .Pp
 The IPv6-specific options are as follows:
