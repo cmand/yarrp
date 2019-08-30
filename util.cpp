@@ -107,3 +107,29 @@ uint32_t intlog(uint32_t in) {
   while (in >>= 1) { ++l; }
   return l;
 }
+
+/* Ensure that only one instance of Yarrp is running */
+void instanceLock() {
+  const char *homedir = getenv("HOME");
+  if (homedir) {
+    char dotdir[1500];
+    snprintf(dotdir, 1500, "%s/.yarrp", homedir);
+    struct stat st = {0};
+    if (stat(dotdir, &st) == -1) {
+      mkdir(dotdir, 0755);
+    }
+    char lockfile[1500];
+    snprintf(lockfile, 1500, "%s/lock", dotdir);
+    int fd = open(lockfile, O_CREAT | O_RDWR, 0644);
+    struct flock lock;
+    memset(&lock, 0, sizeof(lock));
+    lock.l_type = F_WRLCK;
+    if (fcntl(fd, F_SETLK, &lock) < 0) {
+      cerr << "*** " << __func__ << ": Yarrp instance already running." << endl;
+      exit(-1);
+    }
+  } else {
+    cerr << "*** " << __func__ << ": getenv" << endl;
+    exit(-1);
+  }
+}

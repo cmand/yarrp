@@ -201,6 +201,10 @@ main(int argc, char **argv) {
     if (not config.testing) 
         checkRoot();
 
+    /* Ensure we're the only Yarrp probing instance on this machine */ 
+    if (config.probe)
+        instanceLock();
+
     /* Sanity check fill mode */
     if ((config.fillmode > 0) and (config.fillmode < config.maxttl)) 
         fatal("Fill mode TTL must be larger than max_ttl");

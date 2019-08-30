@@ -54,6 +54,7 @@
 #endif
 #include <strings.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/time.h>
 #include <time.h>
@@ -112,6 +113,7 @@ uint32_t tsdiff(struct timeval *end, struct timeval *begin);
 uint32_t tsdiffus(struct timeval *end, struct timeval *begin);
 uint8_t randuint8();
 bool checkRoot();
+void instanceLock();
 double decayprob(double t, uint32_t range);
 double decayprob(int32_t t, uint32_t range);
 double zrand();

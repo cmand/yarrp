@@ -43,7 +43,7 @@ esac
 # Checks for header files.
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h inttypes.h netdb.h])
 AC_CHECK_HEADERS([netinet/in.h stdint.h stdlib.h string.h strings.h])
-AC_CHECK_HEADERS([sys/param.h sys/types.h sys/socket.h unistd.h])
+AC_CHECK_HEADERS([sys/param.h sys/stat.h sys/types.h sys/socket.h unistd.h])
 AC_CHECK_HEADERS([netinet/in_systm.h netinet/udp.h])
 AC_CHECK_HEADERS([netinet/tcp.h])
 AC_CHECK_HEADERS([netinet/ip.h netinet/ip_icmp.h netinet/ip_var.h], [], [], [
