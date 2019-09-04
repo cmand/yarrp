@@ -128,7 +128,7 @@ reloop:
                         trace->probe(icmp->quoteDst6(), icmp->getTTL() + 1); 
                     }
                 }
-                icmp->write(&(trace->out), trace->stats->count);
+                icmp->write(&(trace->config->out), trace->stats->count);
                 /* TTL tree histogram */
                 if (trace->ttlhisto.size() > icmp->quoteTTL()) {
                     ttlhisto = trace->ttlhisto[icmp->quoteTTL()];

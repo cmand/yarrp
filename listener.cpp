@@ -74,7 +74,7 @@ listener(void *args) {
                         trace->probe(icmp->quoteDst(), icmp->getTTL() + 1); 
                     }
                 }
-                icmp->write(&(trace->out), trace->stats->count);
+                icmp->write(&(trace->config->out), trace->stats->count);
 #if 0
                 Status *status = NULL;
                 if (trace->tree != NULL) 

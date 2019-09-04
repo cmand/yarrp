@@ -224,11 +224,11 @@ ICMP6::print() {
 void ICMP::write(FILE ** out, uint32_t count, char *src, char *target) {
     if (*out == NULL)
         return;
-    fprintf(*out, "%s, %lu, %ld, %d, %d, ",
+    fprintf(*out, "%s %lu %ld %d %d ",
         target, tv.tv_sec, (long) tv.tv_usec, type, code);
-    fprintf(*out, "%d, %s, %d, %u, ",
+    fprintf(*out, "%d %s %d %u ",
         ttl, src, rtt, ipid);
-    fprintf(*out, "%d, %d, %d, %d, ",
+    fprintf(*out, "%d %d %d %d ",
         probesize, replysize, replyttl, replytos);
     fprintf(*out, "%d\n", count);
 }

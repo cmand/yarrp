@@ -288,9 +288,12 @@ main(int argc, char **argv) {
     if (config.bgpfile)
         trace->addTree(tree);
 
+    /* Open output */
+    if (config.receive)
+        config.dump();
+
     /* Start listener if we're only in receive mode */
     if ( (not config.probe) and config.receive) {
-        trace->openOutput();
         if (config.ipv6)
             listener6(trace);
         else
@@ -324,7 +327,7 @@ main(int argc, char **argv) {
     /* Finished, cleanup */
     if (config.receive) {
         if (config.output and not config.testing)
-          stats->dump(trace->out);
+          stats->dump(trace->config->out);
         else 
           stats->dump(stdout);
     }

@@ -16,6 +16,8 @@ Traceroute6::Traceroute6(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
     } else {
         infer_my_ip6(&source6);
     }
+    inet_ntop(AF_INET6, &source6.sin6_addr, addrstr, INET6_ADDRSTRLEN);
+    config->set("SourceIP", addrstr, true);
 #ifdef _LINUX
     sndsock = raw_sock6(&source6);
 #else
@@ -49,9 +51,6 @@ Traceroute6::Traceroute6(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
     payload->instance = config->instance;
 
     if (config->probe and config->receive) {
-        /* Open output ytr file */
-        if (config->output)
-            openOutput();
         pthread_create(&recv_thread, NULL, listener6, this);
         /* give listener thread time to startup */
         sleep(1);
@@ -94,7 +93,7 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     outip->ip6_dst = addr;
 
     uint16_t transport_hdr_len = 0;
-    switch(tr_type) {
+    switch(config->type) {
       case TR_ICMP6:
         outip->ip6_nxt = IPPROTO_ICMPV6;
         transport_hdr_len = sizeof(struct icmp6_hdr);
@@ -132,7 +131,7 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
 
     /* xmit frame */
     if (verbosity > HIGH) {
-      cout << ">> " << Tr_Type_String[tr_type] << " probe: ";
+      cout << ">> " << Tr_Type_String[config->type] << " probe: ";
       probePrint(addr, ttl);
     }
     uint16_t framelen = ETH_HDRLEN + sizeof(ip6_hdr) + packlen;
@@ -153,7 +152,7 @@ void
 Traceroute6::make_transport() {
     void *transport = frame + ETH_HDRLEN + sizeof(ip6_hdr);
     uint16_t sum = in_cksum((unsigned short *)&(outip->ip6_dst), 16);
-    if (tr_type == TR_ICMP6) {
+    if (config->type == TR_ICMP6) {
         struct icmp6_hdr *icmp6 = (struct icmp6_hdr *)transport;
         icmp6->icmp6_type = ICMP6_ECHO_REQUEST;
         icmp6->icmp6_code = 0;
@@ -161,7 +160,7 @@ Traceroute6::make_transport() {
         icmp6->icmp6_id = htons(sum);
         icmp6->icmp6_seq = htons(pcount);
         icmp6->icmp6_cksum = p_cksum(outip, (u_short *) icmp6, packlen);
-    } else if (tr_type == TR_UDP6) {
+    } else if (config->type == TR_UDP6) {
         struct udphdr *udp = (struct udphdr *)transport;
         udp->uh_sport = htons(sum);
         udp->uh_dport = htons(dstport);
@@ -172,7 +171,7 @@ Traceroute6::make_transport() {
         uint16_t crafted_cksum = htons(0xbeef);
         payload->fudge = compute_data(udp->uh_sum, crafted_cksum);
         udp->uh_sum = crafted_cksum;
-    } else if (tr_type == TR_TCP6_SYN || tr_type == TR_TCP6_ACK) {
+    } else if (config->type == TR_TCP6_SYN || config->type == TR_TCP6_ACK) {
         struct tcphdr *tcp = (struct tcphdr *)transport;
         tcp->th_sport = htons(sum);
         tcp->th_dport = htons(dstport);
@@ -183,7 +182,7 @@ Traceroute6::make_transport() {
         tcp->th_x2 = 0;
         tcp->th_flags = 0;
         tcp->th_urp = htons(0);
-        if (tr_type == TR_TCP6_SYN) 
+        if (config->type == TR_TCP6_SYN) 
            tcp->th_flags |= TH_SYN; 
         else
            tcp->th_flags |= TH_ACK; 
@@ -193,10 +192,4 @@ Traceroute6::make_transport() {
         payload->fudge = compute_data(tcp->th_sum, crafted_cksum);
         tcp->th_sum = crafted_cksum;
     }
-}
-
-void
-Traceroute6::openOutput() {
-    inet_ntop(AF_INET6, &(getSource()->sin6_addr), addrstr, INET6_ADDRSTRLEN);
-    Traceroute::openOutput(addrstr);
 }

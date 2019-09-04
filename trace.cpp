@@ -7,12 +7,16 @@
 
 Traceroute::Traceroute(YarrpConfig *_config, Stats *_stats) : config(_config), stats(_stats), tree(NULL)
 {
-    tr_type = (traceroute_type) config->type; 
     dstport = config->dstport;
     if (config->ttl_neighborhood)
       initHisto(config->ttl_neighborhood);
     gettimeofday(&start, NULL);
     debug(HIGH, ">> Traceroute engine started: " << start.tv_sec);
+    // RFC2822 timestring
+    struct tm *p = localtime(&(start.tv_sec));
+    char s[1000];
+    strftime(s, 1000, "%a, %d %b %Y %T %z", p);
+    config->set("Start", s, true);
 }
 
 Traceroute::~Traceroute() {
@@ -20,8 +24,8 @@ Traceroute::~Traceroute() {
     debug(HIGH, ">> Traceroute engine stopped: " << start.tv_sec);
     fflush(NULL);
     pthread_cancel(recv_thread);
-    if (out)
-        fclose(out);
+    if (config->out)
+        fclose(config->out);
 }
 
 void
@@ -55,39 +59,4 @@ Traceroute::elapsed() {
     if (config->coarse)
         return tsdiff(&now, &start);
     return tsdiffus(&now, &start); 
-}
-
-void
-Traceroute::openOutput(const char *src) {
-    debug(DEBUG, ">> Output: " << config->output);
-    if ( (config->output)[0] == '-')
-      out = stdout;
-    else
-      out = fopen(config->output, "a");
-    if (out == NULL)
-        fatal("%s: %s", __func__, strerror(errno));
-#ifdef GITREV
-    fprintf(out, "# yarrp v%s (%s)\n", VERSION, GITREV);
-#else
-    fprintf(out, "# yarrp v%s\n", VERSION);
-#endif
-    fprintf(out, "# Started: %s", ctime(&(start.tv_sec)));
-    fprintf(out, "# Source: %s\n", src);
-    fprintf(out, "# Trace type: %s (%d)\n", Tr_Type_String[tr_type], tr_type);
-    fprintf(out, "# Rate: %u pps\n", config->rate);
-    if (config->inlist) 
-        fprintf(out, "# Target file: %s\n", config->inlist);
-    else if (config->entire)
-        fprintf(out, "# Targets: entire\n");
-    fprintf(out, "# Probing: Random: %d Seed: %d\n",
-        config->random_scan, config->seed);
-    fprintf(out, "# TTL control: Max: %d Fill: %d Poisson: %d Nbrhood: %d\n",
-        config->maxttl, config->fillmode, config->poisson, config->ttl_neighborhood);
-    if (config->bgpfile)
-        fprintf(out, "# BGP table: %s\n", config->bgpfile);
-    if (config->coarse)
-        fprintf(out, "# RTT granularity: ms\n");
-    else
-        fprintf(out, "# RTT granularity: us\n");
-    fprintf(out, "# target, sec, usec, type, code, ttl, hop, rtt, ipid, psize, rsize, rttl, rtos, count\n");
 }

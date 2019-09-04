@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2016-2017, Robert Beverly
+# Copyright (c) 2016-2019, Robert Beverly
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -84,49 +84,39 @@ class Yarrp:
       return False
     if line[0] == '#':
       try:
-        # TraceType: 0 Count: 0 Rate: 1000
-        if line.find('TraceType') != -1:
-          fields = line.strip().split()
-          self.tracetype = tracetypemap[traceroute_type[int(fields[2])]]
-        if line.find('Trace type') != -1:
-          fields = line.strip().split()
-          self.tracetype = tracetypemap[fields[-2]]
-        if line.find('Source') != -1:
-          (t, t, self.vantage_point) = line.strip().split()
-        if line.find('RTT granularity: us') != -1:
-          self.us_granularity = True
-        if line.find('RTT granularity: ms') != -1:
-          self.us_granularity = False
-        if line.find('MaxTTL') != -1:
-          self.maxttl = int(line.strip().split()[5])
-        if line.find('Started') != -1:
-          self.start = line.strip().split('Started: ')[-1]
-        if line.find('Current TS') != -1:
-          self.end = line.strip().split('Current TS: ')[-1]
-        if line.find('TTL control') != -1:
-          self.maxttl = int(line.strip().split()[4])
-          self.fillttl = int(line.strip().split()[6])
-        if line.find('Fills') != -1:
-          self.fills = int(line.strip().split()[2])
-        if line.find('Pkts') != -1:
-          self.packets = int(line.strip().split()[2])
+        (key, value) = line[2:].strip().split(': ')
+        #print "Key:", key, "Value:", value
+        if key == "Trace_Type":
+          self.tracetype = tracetypemap[value]
+        if key == "SourceIP":
+          self.vantage_point = value
+        if key == "RTT_Granularity":
+          if value == "us":
+            self.us_granularity = True
+          else:
+            self.us_granularity = False
+        if key == "Max_TTL":
+          self.maxttl = int(value)
+        if key == "Start":
+          self.start = value
+        if key == "Fill_Mode":
+          self.filttl = int(value)
+        if key == "Fills":
+          self.fills = int(value)
+        if key == 'Pkts':
+          self.packets = int(value)
       except Exception, e:
         print "Error:", e 
         pass
       return self.next()
-    fields = line.strip().split(', ')
+    fields = line.strip().split()
     r = dict()
     if not self.columns: self.columns = len(fields)
     if len(fields) != self.columns:
       return False
     try:
-      # old format
-      if self.columns == 13:
-        (r['target'], r['sec'], r['usec'], r['typ'], r['code'], 
-         r['ttl'], r['hop'], r['rtt'], r['ipid'], r['psize'], 
-         r['rsize'], r['rttl'], r['rtos']) = fields
       # new format
-      elif self.columns == 14:
+      if self.columns == 14:
           (r['target'], r['sec'], r['usec'], r['typ'], r['code'], 
            r['ttl'], r['hop'], r['rtt'], r['ipid'], r['psize'], 
            r['rsize'], r['rttl'], r['rtos'], r['count']) = fields

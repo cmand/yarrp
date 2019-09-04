@@ -68,11 +68,20 @@
 
 #include <iostream>
 #include <vector>
+#include <map>
 #include <algorithm>
 
 #include "cperm.h" 
 
 enum debugLevel {OFF, LOW, HIGH, DEBUG, DEVELOP};
+typedef enum {TR_ICMP6, TR_ICMP, TR_UDP6, TR_UDP,
+              TR_TCP6_SYN, TR_TCP_SYN, TR_TCP6_ACK,
+              TR_TCP_ACK, TR_ICMP_REPLY} traceroute_type;
+
+static const char *Tr_Type_String[] = {"ICMP6", "ICMP", "UDP6", "UDP",
+              "TCP6_SYN", "TCP_SYN", "TCP6_ACK",
+              "TCP_ACK", "ICMP_REPLY"};
+
 extern int verbosity;
 #define func() do {fprintf(stdout,"\t>> %s:%s():%d\n",__FILE__,__FUNCTION__,__LINE__); } while (0)
 #define warn(x...) do {fprintf(stderr,"*** Warn: "); fprintf(stderr,x); fprintf(stderr,"\n");} while (0)
@@ -80,7 +89,7 @@ extern int verbosity;
 #define debug(level,x...) do {if (verbosity >= level) {std::cout << x << std::endl;} } while (0)
 #define PKTSIZE 1500
 #define MAXNULLREADS 10
-#define SHUTDOWN_WAIT 10
+#define SHUTDOWN_WAIT 60
 //#define SHUTDOWN_WAIT 300
 #define KEYLEN 16
 #ifndef UINT8_MAX

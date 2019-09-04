@@ -1,3 +1,6 @@
+typedef std::pair<std::string, bool> val_t;
+typedef std::map<std::string, val_t> params_t;
+
 class YarrpConfig {
   public:
   YarrpConfig() : rate(10), random_scan(true), ttl_neighborhood(0),
@@ -7,10 +10,12 @@ class YarrpConfig {
     dstport(80),
     ipv6(false), int_name(NULL), dstmac(NULL), srcmac(NULL), srcaddr(NULL),
     coarse(false), fillmode(32), poisson(0),
-    probesrc(NULL), probe(true), receive(true), instance(0) {};
+    probesrc(NULL), probe(true), receive(true), instance(0), out(NULL) {};
 
   void parse_opts(int argc, char **argv); 
   void usage(char *prog);
+  void set(std::string, std::string, bool);
+  void dump() { if (output) dump(out); }
   unsigned int rate;
   bool random_scan;
   uint8_t ttl_neighborhood;
@@ -37,4 +42,9 @@ class YarrpConfig {
   bool probe;
   bool receive;
   uint8_t instance;
+  FILE *out;   /* output file stream */
+  params_t params;
+
+  private:
+  void dump(FILE *fd);
 };

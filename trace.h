@@ -4,14 +4,6 @@
    Description: trace structures
 ****************************************************************************/
 
-typedef enum {TR_ICMP6, TR_ICMP, TR_UDP6, TR_UDP, 
-              TR_TCP6_SYN, TR_TCP_SYN, TR_TCP6_ACK, 
-              TR_TCP_ACK, TR_ICMP_REPLY} traceroute_type;
-
-static const char *Tr_Type_String[] = {"ICMP6", "ICMP", "UDP6", "UDP",
-              "TCP6_SYN", "TCP_SYN", "TCP6_ACK",
-              "TCP_ACK", "ICMP_REPLY"};
-
 /* Payload for IPv6 Yarrp probes */
 struct ypayload {
     uint32_t id;      /* "yrp6" = 0x79 72 70 36 */
@@ -35,16 +27,13 @@ class Traceroute {
     void initHisto(uint8_t);
     void dumpHisto();
     uint32_t elapsed();
-    void openOutput(const char *);
     virtual void probe(uint32_t, int) {};
-    virtual void openOutput() {};
     virtual void probe(struct sockaddr_in *, int) {};
     virtual void probePrint(struct in_addr *, int) {};
     virtual void probe(struct in6_addr, int) {};
     virtual void probePrint(struct in6_addr, int) {};
 
     public:
-    FILE *out;   /* output file stream */
     Patricia *tree;
     Stats *stats;
     YarrpConfig *config;
@@ -55,7 +44,6 @@ class Traceroute {
     int payloadlen;
     int packlen;
     pthread_t recv_thread;
-    traceroute_type tr_type;
     uint16_t dstport;
     struct timeval start;
     struct timeval now;
@@ -70,7 +58,6 @@ class Traceroute4 : public Traceroute {
     void probe(uint32_t, int);
     void probe(struct sockaddr_in *, int);
     void probePrint(struct in_addr *, int);
-    void openOutput();
 
     private:
     void probeUDP(struct sockaddr_in *, int);
@@ -78,6 +65,7 @@ class Traceroute4 : public Traceroute {
     void probeICMP(struct sockaddr_in *, int);
     struct ip *outip;
     struct sockaddr_in source;
+    char addrstr[INET_ADDRSTRLEN];
 };
 
 class Traceroute6 : public Traceroute {
@@ -88,7 +76,6 @@ class Traceroute6 : public Traceroute {
     void probe(struct in6_addr, int);
     void probePrint(struct in6_addr, int);
     void probe(void *, struct in6_addr, int);
-    void openOutput();
 
     private:
     void make_transport();

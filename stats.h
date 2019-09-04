@@ -23,16 +23,22 @@ class Stats {
     void dump(FILE *out) {
       gettimeofday(&end, NULL);
       float t = (float) tsdiff(&end, &start) / 1000.0;
-      fprintf(out, "#\n# Probing statistics\n");
-      fprintf(out, "# Current TS: %s", ctime(&(end.tv_sec)));  
-      fprintf(out, "# Bad response: %u\n", baddst);
+      // RFC2822 timestring
+      struct tm *p = localtime(&(end.tv_sec));
+      char s[1000];
+      strftime(s, 1000, "%a, %d %b %Y %T %z", p);
+      fprintf(out, "# End: %s\n", s);
+      fprintf(out, "# Bad_Resp: %u\n", baddst);
       fprintf(out, "# Fills: %u\n", fills);
-      fprintf(out, "# Outside: [%u/%u/%u] (ttl/bgp/address)\n",
-          ttl_outside, bgp_outside, adr_outside);
-      fprintf(out, "# Skipped: [%u/%u] (neighbor/bgp)\n",
-          nbr_skipped, bgp_skipped);
-      fprintf(out, "# Pkts: %u In: %2.2fs (Approx: %2.2f p/sec)\n", 
-          count, t, (float) count / t);
+      fprintf(out, "# Outside_TTL: %u\n", ttl_outside);
+      fprintf(out, "# Outside_BGP: %u\n", bgp_outside);
+      fprintf(out, "# Outside_Addr: %u\n", adr_outside);
+      fprintf(out, "# Skipped_Nbr: %u\n", nbr_skipped);
+      fprintf(out, "# Skipped_BGP: %u\n", bgp_skipped);
+      fprintf(out, "# Pkts: %u\n", count);
+      fprintf(out, "# Elapsed: %2.2fs\n", t);
+      fprintf(out, "# PPS: %2.2f\n", (float) count / t);
+      fprintf(out, "#\n");
     };
     
     uint32_t count;       // number of probes sent

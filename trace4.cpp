@@ -16,6 +16,8 @@ Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
     } else {
         infer_my_ip(&source);
     }
+    inet_ntop(AF_INET, &source.sin_addr, addrstr, INET_ADDRSTRLEN);
+    config->set("SourceIP", addrstr, true);
     payloadlen = 0;
     outip = (struct ip *)calloc(1, PKTSIZE);
     outip->ip_v = IPVERSION;
@@ -28,9 +30,6 @@ Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
         pthread_create(&recv_thread, NULL, listener, this);
         /* give listener thread time to startup */
         sleep(1);
-        /* Open output ytr file */
-        if (config->output)
-            openOutput();
     }
 }
 
@@ -81,14 +80,14 @@ Traceroute4::probe(struct sockaddr_in *target, int ttl) {
     outip->ip_off = 0; // htons(IP_DF);
     outip->ip_dst.s_addr = (target->sin_addr).s_addr;
     outip->ip_sum = 0;
-    if (TR_UDP == tr_type) {
+    if (TR_UDP == config->type) {
         probeUDP(target, ttl);
-    } else if ( (TR_ICMP == tr_type) || (TR_ICMP_REPLY == tr_type) ) {
+    } else if ( (TR_ICMP == config->type) || (TR_ICMP_REPLY == config->type) ) {
         probeICMP(target, ttl);
-    } else if ( (TR_TCP_SYN == tr_type) || (TR_TCP_ACK == tr_type) ) {
+    } else if ( (TR_TCP_SYN == config->type) || (TR_TCP_ACK == config->type) ) {
         probeTCP(target, ttl);
     } else {
-        cerr << "** bad trace type:" << tr_type << endl;
+        cerr << "** bad trace type:" << config->type << endl;
         assert(false);
     }
 }
@@ -176,7 +175,7 @@ Traceroute4::probeTCP(struct sockaddr_in *target, int ttl) {
     tcp->th_win = htons(0xFFFE);
     tcp->th_sum = 0;
     /* don't want to set SYN, lest we be tagged as SYN flood. */
-    if (TR_TCP_SYN == tr_type) {
+    if (TR_TCP_SYN == config->type) {
         tcp->th_flags |= TH_SYN;
     } else {
         tcp->th_flags |= TH_ACK;
@@ -221,7 +220,7 @@ Traceroute4::probeICMP(struct sockaddr_in *target, int ttl) {
         probePrint(&target->sin_addr, ttl);
     }
     icmp->icmp_type = ICMP_ECHO;
-    if (TR_ICMP_REPLY == tr_type)
+    if (TR_ICMP_REPLY == config->type)
         icmp->icmp_type = ICMP_ECHOREPLY;
     icmp->icmp_code = 0;
     icmp->icmp_cksum = 0;
@@ -248,9 +247,4 @@ Traceroute4::probeICMP(struct sockaddr_in *target, int ttl) {
         cout << ">> ICMP probe: " << inet_ntoa(target->sin_addr) << " ttl: ";
         cout << ttl << " t=" << diff << endl;
     }
-}
-
-void
-Traceroute4::openOutput() {
-    Traceroute::openOutput(inet_ntoa(getSource()->sin_addr));  
 }
