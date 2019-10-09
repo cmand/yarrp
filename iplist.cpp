@@ -127,7 +127,10 @@ uint32_t IPList4::next_address_rand(struct in_addr *in, uint8_t * ttl) {
     return 0;
 
   in->s_addr = targets[next >> ttlbits];
-  *ttl = (next & ttlmask)  + 1;
+  if (ttlbits == 0)
+    *ttl = 1;
+  else
+    *ttl = (next & ttlmask)  + 1;
   return 1;
 }
 

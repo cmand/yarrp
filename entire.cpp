@@ -7,12 +7,11 @@
 void internet(YarrpConfig *config, Traceroute *trace, Patricia *tree, Stats *stats) {
     uint8_t ttl;
     uint32_t val = 0;
-    uint32_t addr = 0;
+    struct in_addr target;
     TTLHisto *ttlhisto = NULL;
     Status *status = NULL;
 
     uint32_t host = 1 << 24;
-    struct in_addr in;
     char *p = NULL;
     int i;
     double prob, flip;
@@ -42,20 +41,22 @@ void internet(YarrpConfig *config, Traceroute *trace, Patricia *tree, Stats *sta
 
     p = (char *) &val;
     while (PERM_END != cperm_next(perm, &val)) {
-        addr = val & 0x00FFFFFF;    // pick out 24 bits of network
+        target.s_addr = val & 0x00FFFFFF;    // pick out 24 bits of network
         ttl = val >> 24;            // use remaining 8 bits of perm as ttl
         /* Probe a host in each /24 that's a function of the /24
            (so it appears somewhat random), but is deterministic,
            and fast to compute */
         host = (p[0] + p[1] + p[2]) & 0xFF;
-        addr += (host << 24);               
+        target.s_addr += (host << 24);               
         if ( (ttl & 0xE0) != 0x0) { // fast check: ttls in [0,31]
           stats->ttl_outside++;
           continue;
         }
+        if (ttl >= config->maxttl)
+          continue;
 #if 1
         /* Only send probe if destination is in BGP table */
-        status = (Status *) tree->get(addr);
+        status = (Status *) tree->get(target.s_addr);
         if (not status)  {
             stats->bgp_outside++;
             continue;
@@ -89,13 +90,18 @@ void internet(YarrpConfig *config, Traceroute *trace, Patricia *tree, Stats *sta
             if (flip > prob)
                 continue;
         }
-        trace->probe(addr, ttl);
+        /* Passed all checks, continue and send probe */
+        if (not config->testing) 
+            trace->probe(target.s_addr, ttl);
+        else
+            trace->probePrint(&target, ttl);
         stats->count++;                
         if (stats->count == config->count)
             break;
         /* Every 4096, do this */
         if ( (stats->count & 0xFFF) == 0xFFF ) {
-            stats->dump(stderr);
+            if (not config->testing)
+                stats->dump(stderr);
             if (config->rate) {
                 /* Calculate sleep time based on scan rate */
                 usleep( (1000000 / config->rate) * 4096 );
