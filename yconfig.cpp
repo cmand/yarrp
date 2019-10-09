@@ -184,19 +184,21 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             usage(argv[0]);
         }
     }
-    /* set default output file, if not set */
-    if (not output) {
-        output = (char *) malloc(UINT8_MAX);
-        snprintf(output, UINT8_MAX, "output.yrp");
+    if (not testing) {
+        /* set default output file, if not set */
+        if (not output) {
+            output = (char *) malloc(UINT8_MAX);
+            snprintf(output, UINT8_MAX, "output.yrp");
+        }
+        debug(DEBUG, ">> Output: " << output);
+        /* set output file */
+        if ( (output)[0] == '-')
+            out = stdout;
+        else
+            out = fopen(output, "a");
+        if (out == NULL)
+            fatal("%s: cannot open %s: %s", __func__, output, strerror(errno));
     }
-    debug(DEBUG, ">> Output: " << output);
-    /* set output file */
-    if ( (output)[0] == '-')
-        out = stdout;
-    else
-        out = fopen(output, "a");
-    if (out == NULL)
-        fatal("%s: %s", __func__, strerror(errno));
 
     /* set default destination port based on tracetype, if not set */
     if (not dstport) {
