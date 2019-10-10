@@ -27,6 +27,8 @@ class Traceroute {
     void initHisto(uint8_t);
     void dumpHisto();
     uint32_t elapsed();
+    void lock();
+    void unlock();
     virtual void probe(uint32_t, int) {};
     virtual void probe(struct sockaddr_in *, int) {};
     virtual void probePrint(struct in_addr *, int) {};
@@ -44,6 +46,7 @@ class Traceroute {
     int payloadlen;
     int packlen;
     pthread_t recv_thread;
+    pthread_mutex_t recv_lock;
     uint16_t dstport;
     struct timeval start;
     struct timeval now;

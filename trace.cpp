@@ -17,6 +17,7 @@ Traceroute::Traceroute(YarrpConfig *_config, Stats *_stats) : config(_config), s
     char s[1000];
     strftime(s, 1000, "%a, %d %b %Y %T %z", p);
     config->set("Start", s, true);
+    pthread_mutex_init(&recv_lock, NULL);
 }
 
 Traceroute::~Traceroute() {
@@ -59,4 +60,14 @@ Traceroute::elapsed() {
     if (config->coarse)
         return tsdiff(&now, &start);
     return tsdiffus(&now, &start); 
+}
+
+void
+Traceroute::lock() {
+    pthread_mutex_lock(&recv_lock);
+}
+
+void
+Traceroute::unlock() {
+    pthread_mutex_unlock(&recv_lock);
 }

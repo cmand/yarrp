@@ -289,8 +289,11 @@ main(int argc, char **argv) {
         trace->addTree(tree);
 
     /* Open output */
-    if (config.receive)
+    if (config.receive) {
         config.dump();
+        /* unlock so listener thread starts */
+        trace->unlock();
+    }
 
     /* Start listener if we're only in receive mode */
     if ( (not config.probe) and config.receive) {

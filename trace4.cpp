@@ -27,9 +27,8 @@ Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
        return;
     sndsock = raw_sock(&source);
     if (config->probe and config->receive) {
+        lock();   /* grab mutex; make listener thread block. */
         pthread_create(&recv_thread, NULL, listener, this);
-        /* give listener thread time to startup */
-        sleep(1);
     }
 }
 

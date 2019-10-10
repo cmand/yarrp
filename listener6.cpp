@@ -54,6 +54,10 @@ void *listener6(void *args) {
     struct ypayload *quotepayload = NULL;     /* Quoted ICMPv6 yrp payload */ 
     int rcvsock;                              /* receive (icmp) socket file descriptor */
 
+    /* block until main thread says we're ready. */
+    trace->lock(); 
+    trace->unlock(); 
+
 #ifdef _LINUX
     if ((rcvsock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
         cerr << "yarrp listener socket error:" << strerror(errno) << endl;

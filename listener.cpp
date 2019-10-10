@@ -26,6 +26,10 @@ listener(void *args) {
     struct icmp *ippayload = NULL;
     int rcvsock; /* receive (icmp) socket file descriptor */
 
+    /* block until main thread says we're ready. */
+    trace->lock(); 
+    trace->unlock(); 
+
     if ((rcvsock = socket(AF_INET, SOCK_RAW, IPPROTO_ICMP)) < 0) {
         cerr << "yarrp listener socket error:" << strerror(errno) << endl;
     }
