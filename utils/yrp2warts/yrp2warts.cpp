@@ -226,16 +226,18 @@ int main(int argc, char* argv[])
 	cycle->start_time = stats.t_min;
 	cycle->stop_time = stats.t_max;
 	uint64_t target_count = 0;
+	uint8_t max_dup_ttl_cnt = 0;
 	if (scamper_file_write_cycle_start(outfile, cycle) != 0) { return -1; }
 	//scamper_cycle_free(cycle);
 	for (unordered_map<ipaddress, vector<hop> >::iterator iter = traces.begin(); iter != traces.end(); ++iter) {
 		ipaddress target = iter->first;
 		vector<hop> hops = iter->second;
 		sort(hops.begin(), hops.end());
-		vector<hop>::iterator thishop = unique(hops.begin(), hops.end());
-		hops.resize(distance(hops.begin(), thishop));
+		//vector<hop>::iterator thishop = unique(hops.begin(), hops.end());
+		vector<hop>::iterator thishop = hops.begin();
+		//hops.resize(distance(hops.begin(), thishop));
 		//cout << "Processing trace to " << target << endl;
-		uint8_t probehop;
+		uint16_t probehop;
 		if (hops.size() > stats.maxttl) {
 			probehop = hops.size();
 		}
@@ -244,10 +246,16 @@ int main(int argc, char* argv[])
 		}
 		double trace_timestamp = 0x1.fffffffffffffp+1023;
 		struct timeval tv;
+		uint8_t last_ttl = 0;
+		uint8_t dup_ttl_cnt = 1;
 		for (thishop = hops.begin(); thishop != hops.end(); ++thishop) {
 			if (thishop->ttl > probehop) {
 				probehop = thishop->ttl;
 			}
+			if (thishop->ttl == last_ttl) {
+				dup_ttl_cnt++;
+			}
+			last_ttl = thishop->ttl;
 			//hop thishop = *iter;
 			double hop_timestamp = thishop->sec + (thishop->usec / 1000000.0);
 			if (hop_timestamp < trace_timestamp) {
@@ -256,6 +264,10 @@ int main(int argc, char* argv[])
 				tv.tv_usec = thishop->usec;
 			}
 			//cout << setprecision (17) << hop_timestamp << " " << trace_timestamp << endl;
+		}
+		if (dup_ttl_cnt > max_dup_ttl_cnt) {
+			cout << "There were " << uint16_t(dup_ttl_cnt) << " duplicate TTLs." << endl;
+			max_dup_ttl_cnt = dup_ttl_cnt;
 		}
 		scamper_trace *trace = scamper_trace_alloc();
 		trace->list = list;
@@ -273,9 +285,9 @@ int main(int argc, char* argv[])
 		trace->sport = 1234;
 		trace->dport = 80;
 		scamper_trace_hops_alloc(trace, probehop);
-		uint8_t hopcnt = 0;
+		uint16_t hopcnt = 0;
 		for (vector<hop>::iterator thishop = hops.begin(); thishop != hops.end(); ++thishop) {
-			//cout << "Processing hop " << uint16_t(thishop.ttl) << endl;
+			//cout << "Processing hop " << uint16_t(thishop->ttl) << endl;
 			trace->hops[hopcnt] = scamper_trace_hop_alloc();
 			trace->hops[hopcnt]->hop_addr = ip2scamper_addr(thishop->addr);
 			struct timeval rttv;

@@ -127,7 +127,7 @@ void yarrpFile::close()
 
 bool yarrpFile::readHeader()
 {
-	cout << "Reading Yarrp header" << endl;
+	//cout << "Reading Yarrp header" << endl;
 	if (!m_fhs->good()) {
 		cerr << "Input not good" << endl;
 		return false;
@@ -202,7 +202,7 @@ bool yarrpFile::readHeader()
 
 bool yarrpFile::readTrailer()
 {
-	cout << "Reading Yarrp trailer" << endl;
+	//cout << "Reading Yarrp trailer" << endl;
 	if (!m_fh.good()) {
 		return false;
 	}
