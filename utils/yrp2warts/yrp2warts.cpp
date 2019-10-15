@@ -266,7 +266,7 @@ int main(int argc, char* argv[])
 			//cout << setprecision (17) << hop_timestamp << " " << trace_timestamp << endl;
 		}
 		if (dup_ttl_cnt > max_dup_ttl_cnt) {
-			cout << "There were " << uint16_t(dup_ttl_cnt) << " duplicate TTLs." << endl;
+			//cout << "There were " << uint16_t(dup_ttl_cnt) << " duplicate TTLs." << endl;
 			max_dup_ttl_cnt = dup_ttl_cnt;
 		}
 		scamper_trace *trace = scamper_trace_alloc();
