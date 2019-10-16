@@ -141,6 +141,7 @@ scamper_addr* ip2scamper_addr(ipaddress &ip) {
 		addr = ip.get6().get();
 	}
 	else {
+		//cerr << ip << endl;
 		cerr << "Not an IP address!" << endl;
 		exit(1);
 	}
@@ -183,7 +184,9 @@ yrpStats yarrp_proc(string yarrpfile, unordered_map<ipaddress, vector<hop> > &tr
 		//cout << "addr: " << this_hop.addr << " rtt: " << this_hop.rtt << " ipid: " << this_hop.ipid << " psize: " << this_hop.psize << " rsize: " << this_hop.rsize << " ttl: " << uint16_t(this_hop.ttl) << " rttl: " << uint16_t(this_hop.rttl) << " rtos: " << uint16_t(this_hop.rtos) << " icmp_type: " << uint16_t(this_hop.icmp_type) << " icmp_code: " << uint16_t(this_hop.icmp_code) << endl;	//" hopflags: " << uint16_t(this_hop.hopflags) << endl;
 		//cout << this_hop << endl;
 		//traces[r.target][r.ttl] = this_hop;
-		traces[r.target].push_back(this_hop);
+		//if (traces[r.target].size() < 255) {
+			traces[r.target].push_back(this_hop);	// scamper_trace must be <= 255 hops long
+		//}
 		timestamp = r.sec + (r.usec / 1000000.0);
 		//timestamps[r.target] = timestamp;
 		//cout << timestamps[r.target] << endl;
@@ -233,25 +236,30 @@ int main(int argc, char* argv[])
 		ipaddress target = iter->first;
 		vector<hop> hops = iter->second;
 		sort(hops.begin(), hops.end());
+		if (hops.size() > 255){
+			hops.resize(255);	// scamper_trace can't write > 256 hops
+		}
 		//vector<hop>::iterator thishop = unique(hops.begin(), hops.end());
 		vector<hop>::iterator thishop = hops.begin();
 		//hops.resize(distance(hops.begin(), thishop));
 		//cout << "Processing trace to " << target << endl;
 		uint16_t probehop;
-		if (hops.size() > stats.maxttl) {
+		/*if (hops.size() > stats.maxttl) {
 			probehop = hops.size();
 		}
 		else {
 			probehop = stats.maxttl;
-		}
+		}*/
+		probehop = hops.size();
+		//cout << "This trace has " << probehop << " hops." << endl;
 		double trace_timestamp = 0x1.fffffffffffffp+1023;
 		struct timeval tv;
 		uint8_t last_ttl = 0;
-		uint8_t dup_ttl_cnt = 1;
+		uint16_t dup_ttl_cnt = 1;
 		for (thishop = hops.begin(); thishop != hops.end(); ++thishop) {
-			if (thishop->ttl > probehop) {
+			/*if (thishop->ttl > probehop) {
 				probehop = thishop->ttl;
-			}
+			}*/
 			if (thishop->ttl == last_ttl) {
 				dup_ttl_cnt++;
 			}
@@ -266,7 +274,7 @@ int main(int argc, char* argv[])
 			//cout << setprecision (17) << hop_timestamp << " " << trace_timestamp << endl;
 		}
 		if (dup_ttl_cnt > max_dup_ttl_cnt) {
-			//cout << "There were " << uint16_t(dup_ttl_cnt) << " duplicate TTLs." << endl;
+			//cout << "There were " << dup_ttl_cnt << " duplicate TTLs." << endl;
 			max_dup_ttl_cnt = dup_ttl_cnt;
 		}
 		scamper_trace *trace = scamper_trace_alloc();
@@ -284,10 +292,12 @@ int main(int argc, char* argv[])
 		trace->firsthop = 1;
 		trace->sport = 1234;
 		trace->dport = 80;
+		//cout << "Allocating trace" << endl;
 		scamper_trace_hops_alloc(trace, probehop);
 		uint16_t hopcnt = 0;
 		for (vector<hop>::iterator thishop = hops.begin(); thishop != hops.end(); ++thishop) {
-			//cout << "Processing hop " << uint16_t(thishop->ttl) << endl;
+			//cout << uint16_t(thishop->ttl) << ", ";
+			//cout << thishop->addr << ", ";
 			trace->hops[hopcnt] = scamper_trace_hop_alloc();
 			trace->hops[hopcnt]->hop_addr = ip2scamper_addr(thishop->addr);
 			struct timeval rttv;
@@ -307,7 +317,7 @@ int main(int argc, char* argv[])
 			trace->hops[hopcnt]->hop_icmp_code = thishop->icmp_code;
 			hopcnt++;
 		}
-		//cout << "Writing trace" << endl;
+		//cout << endl << "Writing trace" << endl;
 		if (scamper_file_write_trace(outfile, trace) != 0) { return -1; }
 		//cout << "Trace written" << endl;
 		//scamper_trace_free(trace);
