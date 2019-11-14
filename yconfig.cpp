@@ -259,6 +259,7 @@ YarrpConfig::usage(char *prog) {
     << "  -E, --instance          Prober instance (default: 0)" << endl
     << "  -T, --test              Don't send probes (default: off)" << endl
     << "  -Q, --entire            Entire IPv4/IPv6 Internet (default: off)" << endl
+    << "  -Z, --poisson           Poisson TTLs (default: uniform)" << endl
     << "  -I, --interface         Network interface (required for IPv6)" << endl
     << "  -a, --srcaddr           IPv6 address of probing host (default: auto)" << endl
     << "  -G, --dstmac            MAC of gateway router (default: auto)" << endl
@@ -266,7 +267,6 @@ YarrpConfig::usage(char *prog) {
     << "  -h, --help              Show this message" << endl
 /* Undocumented options */
 //    << "  -C, --coarse            Coarse ms timestamps (default: us)" << endl
-//    << "  -Z, --poisson           Poisson TTLs (default: uniform)" << endl
 //    << "  -P, --probeonly         Probe only, don't receive" << endl
 //    << "  -R, --receiveonly       Receive only, don't probe" << endl
     << "Targets:" << endl

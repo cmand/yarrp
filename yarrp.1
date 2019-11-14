@@ -7,7 +7,7 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd May 12, 2019
+.Dd November 14, 2019
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -35,6 +35,7 @@
 .Op Fl E Ar instance
 .Op Fl M Ar src_mac
 .Op Fl G Ar dst_mac
+.Op Fl Z Ar poisson
 .Op Ar subnet(s)
 .Sh DESCRIPTION
 .Nm
@@ -72,7 +73,7 @@ verbose (use multiple times to increase verbosity)
 .It Fl T
 test mode (default: off)
 .It Fl o Ar outfile
-output ytr file for probing results (default: output.yrp)
+output file for probing results (default: output.yrp)
 .It Fl r Ar rate
 set packet per second probing rate (default: 10pps)
 .It Fl t Ar tr_type
@@ -97,6 +98,8 @@ send probes sequentially (default: random)
 read BGP RIB (Potaroo text format) (default: none)
 .It Fl B Ar blocklist
 read list of prefixes to skip (default: none)
+.It Fl Z Ar poisson
+choose TTLs from a Poisson distribution with specified lambda (default: uniform)
 .El
 .Pp
 The IPv6-specific options are as follows:
@@ -123,24 +126,34 @@ is necessary to filter and collate responses.  The included
 yrp2warts.py python utility performs this reconstitution and produces output
 in the standard warts binary format.
 .Sh TTLs
-.Nm 
 By default, 
 .Nm
 randomly permutes the space of targets and TTLs,
 thereby probing each target with TTLs from 1 to max_ttl in a random
-order.  Three options modify this behavior.  The sequential option
+order.  
+.Pp
+Four options modify this behavior.  The sequential option
 (-s) disables random probing and instead probes sequentially.  The nbr_ttl
 option (-n) is an optimization that stops probing low TTLs within the local
 neighborhood of the prober once 
 .Nm
 determines that it is not
-discovering any new interfaces within that neighborhood.  Finally, in
+discovering any new interfaces within that neighborhood.  In
 fill mode (-F), 
 .Nm
-yarrp will probe, up to a maximum TTL of fill_ttl, the next
+will probe, up to a maximum TTL of fill_ttl, the next
 hop beyond
 max_ttl if it receives a response for a probe with TTL
-greater than or equal to max_ttl.  
+greater than or equal to max_ttl.
+.Pp
+Finally, the -Z option specifies a lambda parameter for a Poisson
+distribution.
+.Nm 
+will iterate through all TTLs, but the probability of probing
+a particular TTL follows a Poisson distribution with the given lambda.
+This mode is intended to maximize router discovery yield, as  
+the majority of Internet routers are concentrated in a particular
+TTL range.
 .Sh EXAMPLES
 The command:
 .Pp
