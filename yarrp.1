@@ -61,8 +61,8 @@ each /48 (IPv6), of the subnets will be probed.
 .It Fl i Ar target_file
 Input list (one address per line) of explicit targets
 .It Fl Q
-Internet-wide scanning.  Probes a target in all /24 IPv4, or all /48 IPv6, 
-addresses (use with caution).
+Internet-wide scanning.  Probes an address in each /24 (IPv4) or each /48 (IPv6) 
+(use with caution).
 .El
 .Pp
 The general options are as follows:
@@ -87,6 +87,10 @@ set permutation random seed (default: timestamp)
 set instance (default: 0)
 .It Fl p Ar dst_port
 use specified transport destination port (default: 80)
+.El
+.Pp
+The target options are as follows:
+.Bl -tag -width Ds
 .It Fl b Ar bgp_rib
 read BGP RIB (Potaroo text format) (default: none)
 .It Fl B Ar blocklist

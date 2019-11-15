@@ -245,40 +245,44 @@ YarrpConfig::dump(FILE *fd) {
 void
 YarrpConfig::usage(char *prog) {
     cout << "Usage: " << prog << " [OPTIONS] [targets]" << endl
-    << "OPTIONS:" << endl
-    << "  -i, --input             Input target file" << endl
+
+    << "General options:" << endl
     << "  -o, --output            Output file (default: output.yrp)" << endl
-    << "  -c, --count             Probes to issue (default: unlimited)" << endl
     << "  -t, --type              Probe type: ICMP, ICMP_REPLY, TCP_SYN, TCP_ACK, UDP," << endl
-    << "                                      ICMP6, UDP6, TCP6_SYN, TCP6_ACK (default: TCP_ACK)" << endl
+    << "                                      ICMP6, UDP6, TCP6_SYN, TCP6_ACK" << endl 
+    << "                                      (default: TCP_ACK)" << endl
     << "  -r, --rate              Scan rate in pps (default: 10)" << endl
+    << "  -c, --count             Probes to issue (default: unlimited)" << endl
+    << "  -v, --verbose           verbose (default: off)" << endl
+    << "  -S, --seed              Seed (default: random)" << endl
+    << "  -p, --port              Transport dst port (default: 80)" << endl
+    << "  -T, --test              Don't send probes (default: off)" << endl
+    << "  -E, --instance          Prober instance (default: 0)" << endl
+
+    << "Target options:" << endl
+    << "  -i, --input             Input target file" << endl
+    << "  -b, --bgp               BGP table (default: none)" << endl
+    << "  -B, --blocklist         Prefix blocklist (default: none)" << endl
+    << "  -Q, --entire            Entire IPv4/IPv6 Internet (default: off)" << endl
+
+    << "TTL options:" << endl
     << "  -l, --minttl            Minimum TTL (default: 1)" << endl
     << "  -m, --maxttl            Maximum TTL (default: 16)" << endl
-    << "  -v, --verbose           verbose (default: off)" << endl
     << "  -F, --fillmode          Fill mode maxttl (default: 32)" << endl
     << "  -s, --sequential        Scan sequentially (default: random)" << endl
     << "  -n, --neighborhood      Neighborhood TTL (default: 0)" << endl
-    << "  -b, --bgp               BGP table (default: none)" << endl
-    << "  -B, --blocklist         Prefix Blocklist (default: none)" << endl
-    << "  -S, --seed              Seed (default: random)" << endl
-    << "  -p, --port              Transport dst port (default: 80)" << endl
-    << "  -E, --instance          Prober instance (default: 0)" << endl
-    << "  -T, --test              Don't send probes (default: off)" << endl
-    << "  -Q, --entire            Entire IPv4/IPv6 Internet (default: off)" << endl
     << "  -Z, --poisson           Poisson TTLs (default: uniform)" << endl
+
+    << "IPv6 options:" << endl
     << "  -I, --interface         Network interface (required for IPv6)" << endl
     << "  -a, --srcaddr           IPv6 address of probing host (default: auto)" << endl
     << "  -G, --dstmac            MAC of gateway router (default: auto)" << endl
     << "  -M, --srcmac            MAC of probing host (default: auto)" << endl
-    << "  -h, --help              Show this message" << endl
+
 /* Undocumented options */
 //    << "  -C, --coarse            Coarse ms timestamps (default: us)" << endl
 //    << "  -P, --probeonly         Probe only, don't receive" << endl
 //    << "  -R, --receiveonly       Receive only, don't probe" << endl
-    << "Targets:" << endl
-    << "  List of IPv4 or IPv6 prefixes." << endl
-    << "    Example: 192.168.1.0/24" << endl
-    << "             2602:306:8b92:b000::/47" << endl
     << endl;
     exit(-1);
 }
