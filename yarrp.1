@@ -7,47 +7,48 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd November 14, 2019
+.Dd November 15, 2019
 .Dt YARRP 1
 .Os
 .Sh NAME
 .Nm yarrp
-.Nd high-speed active IPv4/IPv6 topology prober
+.Nd high-speed active IPv4/IPv6 network topology prober
 .Sh SYNOPSIS
 .Nm
 .Bk -words
 .Op Fl hvQT
-.Op Fl a Ar ipv6_src
+.Op Fl i Ar target_file
+.Op Fl o Ar outfile
+.Op Fl r Ar rate
+.Op Fl t Ar tr_type
+.Op Fl c Ar tr_count
+.Op Fl S Ar seed
+.Op Fl E Ar instance
+.Op Fl p Ar dst_port
 .Op Fl b Ar bgp_rib
 .Op Fl B Ar blocklist
-.Op Fl c Ar tr_count
-.Op Fl i Ar target_file
+.Op Fl l Ar min_ttl
 .Op Fl m Ar max_ttl
 .Op Fl F Ar fill_ttl
 .Op Fl n Ar nbr_ttl
-.Op Fl o Ar outfile
-.Op Fl r Ar rate
-.Op Fl I Ar interface
 .Op Fl s Ar sequential
-.Op Fl S Ar seed
-.Op Fl p Ar dst_port
-.Op Fl t Ar tr_type
-.Op Fl E Ar instance
+.Op Fl Z Ar poisson
+.Op Fl a Ar ipv6_src
+.Op Fl I Ar interface
 .Op Fl M Ar src_mac
 .Op Fl G Ar dst_mac
-.Op Fl Z Ar poisson
 .Op Ar subnet(s)
 .Sh DESCRIPTION
 .Nm
 (Yelling at Random Routers Progressively) is a high-speed active
-traceroute-style topology discovery tool.  To achieve its high probing
+traceroute-style network topology discovery tool.  To achieve its high probing
 rates, 
 .Nm
 is stateless and randomizes the order of probed destinations and
 TTLs.  By spreading probes, 
 .Nm
 distributes load and attempts to avoid 
-various forms of rate-limiting.  Yarrp supports both IPv4 and IPv6
+network rate-limiting.  Yarrp supports both IPv4 and IPv6
 and can send probes of any transport type (TCP, UDP-paris, or ICMP-paris).
 .Pp
 .Sh OPTIONS
@@ -80,24 +81,30 @@ set packet per second probing rate (default: 10pps)
 set probe type: TCP_ACK, TCP_SYN, UDP, ICMP, ICMP_REPLY (default: TCP_ACK)
 .It Fl c Ar tr_count
 set number of traces to issue (default: unlimited)
-.It Fl m Ar max_ttl
-set maximum TTL (default: 16)
-.It Fl F Ar fill_ttl
-set fill mode maximum TTL (default: 32)
-.It Fl n Ar nbr_ttl
-enable neighborhood enhancement and set local neighborhood TTL (default: off)
 .It Fl S Ar seed
 set permutation random seed (default: timestamp)
 .It Fl E Ar instance 
 set instance (default: 0)
 .It Fl p Ar dst_port
 use specified transport destination port (default: 80)
-.It Fl s
-send probes sequentially (default: random)
 .It Fl b Ar bgp_rib
 read BGP RIB (Potaroo text format) (default: none)
 .It Fl B Ar blocklist
 read list of prefixes to skip (default: none)
+.El
+.Pp
+The options to control TTLs probed are:
+.Bl -tag -width Ds
+.It Fl l Ar min_ttl
+set minimum TTL (default: 1)
+.It Fl m Ar max_ttl
+set maximum TTL (default: 16)
+.It Fl F Ar fill_ttl
+set fill mode maximum TTL (default: 32)
+.It Fl s
+send probes sequentially (default: random)
+.It Fl n Ar nbr_ttl
+enable neighborhood enhancement and set local neighborhood TTL (default: off)
 .It Fl Z Ar poisson
 choose TTLs from a Poisson distribution with specified lambda (default: uniform)
 .El
@@ -129,8 +136,10 @@ in the standard warts binary format.
 By default, 
 .Nm
 randomly permutes the space of targets and TTLs,
-thereby probing each target with TTLs from 1 to max_ttl in a random
-order.  
+thereby probing each target with TTLs from min_ttl to max_ttl in a random
+order.  Note that because of the way
+.Nm
+permutes the probe order, both min_ttl and max_ttl must be a power of two.
 .Pp
 Four options modify this behavior.  The sequential option
 (-s) disables random probing and instead probes sequentially.  The nbr_ttl

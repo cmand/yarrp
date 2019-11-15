@@ -18,6 +18,7 @@ static struct option long_options[] = {
     {"help", no_argument, NULL, 'h'},
     {"input", required_argument, NULL, 'i'},
     {"interface", required_argument, NULL, 'I'},
+    {"minttl", required_argument, NULL, 'l'},
     {"maxttl", required_argument, NULL, 'm'},
     {"dstmac", required_argument, NULL, 'G'},
     {"neighborhood", required_argument, NULL, 'n'},
@@ -66,7 +67,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
 #endif
     params["RTT_Granularity"] = val_t("us", true);
     params["Targets"] = val_t("entire", true);
-    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:m:M:n:o:p:P:Qr:RsS:t:vTZ:", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:P:Qr:RsS:t:vTZ:", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
@@ -131,6 +132,9 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             break;
         case 'R':
             probe = false;
+            break;
+        case 'l':
+            minttl = strtol(optarg, &endptr, 10);
             break;
         case 'm':
             maxttl = strtol(optarg, &endptr, 10);
@@ -214,6 +218,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
     params["Trace_Type"] = val_t(Tr_Type_String[type], true);
     params["Start"] = val_t("unknown", true);
     params["Fill_Mode"] = val_t(to_string(fillmode), true);
+    params["Min_TTL"] = val_t(to_string(minttl), true);
     params["Max_TTL"] = val_t(to_string(maxttl), true);
     params["TTL_Nbrhd"] = val_t(to_string(ttl_neighborhood), true);
     params["Dst_Port"] = val_t(to_string(dstport), true);
@@ -247,6 +252,7 @@ YarrpConfig::usage(char *prog) {
     << "  -t, --type              Probe type: ICMP, ICMP_REPLY, TCP_SYN, TCP_ACK, UDP," << endl
     << "                                      ICMP6, UDP6, TCP6_SYN, TCP6_ACK (default: TCP_ACK)" << endl
     << "  -r, --rate              Scan rate in pps (default: 10)" << endl
+    << "  -l, --minttl            Minimum TTL (default: 1)" << endl
     << "  -m, --maxttl            Maximum TTL (default: 16)" << endl
     << "  -v, --verbose           verbose (default: off)" << endl
     << "  -F, --fillmode          Fill mode maxttl (default: 32)" << endl

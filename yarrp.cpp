@@ -73,6 +73,11 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
             if ((iplist->next_address(&target, &ttl)) == 0)
                 break;
         }
+        /* TTL control enforcement */
+        ttl += config->minttl;
+        if (ttl > config->maxttl) {
+            continue;
+        }
         /* Running w/ a biased TTL probability distribution */
         if (config->poisson) {
             prob = poisson_pmf(ttl, config->poisson);
@@ -192,22 +197,29 @@ void loop(YarrpConfig *config, TYPE *iplist, Traceroute *trace,
     }
 }
 
+int
+sane(YarrpConfig *config) {
+    if (not config->testing) 
+        checkRoot();
+    if (config->minttl > config->maxttl)
+        fatal("min_ttl must be less than or equal max_ttl");
+    if ((config->fillmode > 0) and (config->fillmode < config->maxttl)) 
+        fatal("Fill mode TTL must be larger than max_ttl");
+    return true;
+}
+
 int 
 main(int argc, char **argv) {
     /* Parse options */
     YarrpConfig config = YarrpConfig();
     config.parse_opts(argc, argv);
 
-    if (not config.testing) 
-        checkRoot();
+    /* Sanity checks */
+    sane(&config);
 
     /* Ensure we're the only Yarrp probing instance on this machine */ 
     if (config.probe)
         instanceLock();
-
-    /* Sanity check fill mode */
-    if ((config.fillmode > 0) and (config.fillmode < config.maxttl)) 
-        fatal("Fill mode TTL must be larger than max_ttl");
 
     /* Setup IPv6, if using (must be done before trace object) */
     if (config.ipv6) {
