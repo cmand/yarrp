@@ -44,5 +44,5 @@ EXTRA_DIST = \
   LICENSE \
   CHANGES 
 
-yarrp.1.pdf:
+yarrp.1.pdf: yarrp.1
 	man -t ./yarrp.1 | ps2pdf - > yarrp.1.pdf
