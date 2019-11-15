@@ -53,10 +53,19 @@ void IPList6::seed() {
 }
 
 /* Read list of input IPs */
-void IPList4::read(char *in) {
-  std::ifstream inlist(in);
-  if (inlist.good() == false)
-    fatal("** Bad input file: %s", in);
+void IPList::read(char *in) {
+  if (*in == '-') {
+    read(std::cin);
+  } else {
+    std::ifstream ifile(in);
+    if (ifile.good() == false)
+      fatal("Bad input file: %s", in);
+    read(ifile);
+  }
+}
+
+/* Read list of input IPs */
+void IPList4::read(std::istream& inlist) {
   std::string line;
   struct in_addr addr;
   while (getline(inlist, line)) {
@@ -72,10 +81,7 @@ void IPList4::read(char *in) {
 }
 
 /* Read list of input IPs */
-void IPList6::read(char *in) {
-  std::ifstream inlist(in);
-  if (inlist.good() == false)
-    fatal("Bad input file: %s", in);
+void IPList6::read(std::istream& inlist) {
   std::string line;
   struct in6_addr addr;
   while (getline(inlist, line)) {

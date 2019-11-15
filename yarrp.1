@@ -56,10 +56,10 @@ The set of IPv4 or IPv6 destination targets to probe may be specified
 in one of three ways:
 .Bl -tag -width Ds
 .It Ar subnet(s)
-Specify subnet(s) on command-line. A target in each /24 (IPv4), or
-each /48 (IPv6), of the subnets will be probed.
+Probes a target in each /24 (IPv4), or
+each /48 (IPv6), of the specified subnets.
 .It Fl i Ar target_file
-Input list (one address per line) of explicit targets
+Input list (one address per line) of explicit targets; accepts stdin.
 .It Fl Q
 Internet-wide scanning.  Probes an address in each /24 (IPv4) or each /48 (IPv6) 
 (use with caution).
@@ -74,7 +74,7 @@ verbose (use multiple times to increase verbosity)
 .It Fl T
 test mode (default: off)
 .It Fl o Ar outfile
-output file for probing results (default: output.yrp)
+output file for probing results; accepts stdout. (default: output.yrp)
 .It Fl r Ar rate
 set packet per second probing rate (default: 10pps)
 .It Fl t Ar tr_type

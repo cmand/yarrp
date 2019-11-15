@@ -42,7 +42,8 @@ class IPList {
   virtual uint32_t next_address(struct in_addr *in, uint8_t * ttl) = 0;
   virtual uint32_t next_address(struct in6_addr *in, uint8_t * ttl) = 0;
   virtual void seed() = 0;
-  virtual void read(char *in) = 0;
+  void read(char *in);
+  virtual void read(std::istream& in) = 0;
   uint32_t count() { return permsize; }
   void setkey(int seed);
 
@@ -65,7 +66,7 @@ class IPList4 : public IPList {
   uint32_t next_address_seq(struct in_addr *in, uint8_t * ttl);
   uint32_t next_address_rand(struct in_addr *in, uint8_t * ttl);
   uint32_t next_address(struct in6_addr *in, uint8_t * ttl) { return 0; };
-  void read(char *in);
+  void read(std::istream& in);
   void seed();
 
   private:
@@ -80,7 +81,7 @@ class IPList6 : public IPList {
   uint32_t next_address_seq(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address_rand(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address(struct in_addr *in, uint8_t * ttl) { return 0; };
-  void read(char *in);
+  void read(std::istream& in);
   void seed();
 
   private:
