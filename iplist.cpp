@@ -1,13 +1,14 @@
 #include "yarrp.h"
 #include "random_list.h"
 
-IPList::IPList(uint8_t _maxttl, bool _rand) {
+IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) {
   perm = NULL;
   permsize = 0;
   maxttl = _maxttl;
   ttlbits = intlog(maxttl);
   ttlmask = 0xffffffff >> (32 - ttlbits);
   rand = _rand;
+  entire = _entire;
   memset(key, 0, KEYLEN);
   //std::cout << ">> MAXTTL: " << int(maxttl) << " TTLBits: " << int(ttlbits) << std::endl;
   //printf("ttlmask: %02x\n", ttlmask);
@@ -31,10 +32,14 @@ IPList6::~IPList6() {
 /* seed */
 void IPList4::seed() {
   PermMode mode = PERM_MODE_CYCLE;
-  assert(targets.size() > 0);
-  permsize = targets.size() * maxttl;
-  if (permsize < 1000000) 
-    mode = PERM_MODE_PREFIX;
+  if (not entire) {
+    assert(targets.size() > 0);
+    permsize = targets.size() * maxttl;
+    if (permsize < 1000000) 
+      mode = PERM_MODE_PREFIX;
+  } else {
+    permsize = UINT32_MAX;
+  }
   perm = cperm_create(permsize, mode, PERM_CIPHER_RC5, key, 16);
   assert(perm);
 }
@@ -97,7 +102,9 @@ void IPList6::read(std::istream& inlist) {
 }
 
 uint32_t IPList4::next_address(struct in_addr *in, uint8_t * ttl) {
-  if (rand) 
+  if (entire)
+    return next_address_entire(in, ttl);
+  else if (rand) 
     return next_address_rand(in, ttl);
   else
     return next_address_seq(in, ttl);
@@ -138,6 +145,29 @@ uint32_t IPList4::next_address_rand(struct in_addr *in, uint8_t * ttl) {
   else
     *ttl = (next & ttlmask);
   return 1;
+}
+
+/* Internet-wide scanning mode */
+uint32_t IPList4::next_address_entire(struct in_addr *in, uint8_t * ttl) {
+  static uint32_t next = 0;
+  static uint32_t host;
+  static char *p;
+
+  if (permsize == 0)
+    seed();
+
+  p = (char *) &next;
+  while (PERM_END != cperm_next(perm, &next)) {
+    *ttl = next >> 24;            // use remaining 8 bits of perm as ttl
+    if ( (*ttl & 0xE0) != 0x0) { // fast check: ttls in [0,31]
+      continue;
+    }
+    in->s_addr = next & 0x00FFFFFF;    // pick out 24 bits of network
+    host = (p[0] + p[1] + p[2]) & 0xFF;
+    in->s_addr += (host << 24);
+    return 1;
+  }
+  return 0;
 }
 
 uint32_t IPList6::next_address(struct in6_addr *in, uint8_t * ttl) {

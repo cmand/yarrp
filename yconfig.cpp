@@ -108,6 +108,8 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             break;
         case 'Q':
             entire = true;
+            minttl = 1;
+            maxttl = 31;
             break;
         case 'n':
             ttl_neighborhood = strtol(optarg, &endptr, 10);

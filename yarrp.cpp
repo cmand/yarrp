@@ -211,6 +211,8 @@ sane(YarrpConfig *config) {
     }
     if (config->entire and not config->bgpfile) 
         fatal("Entire Internet mode requires BGP table");
+    if (config->inlist and config->entire)
+        fatal("Cannot run in entire Internet mode with input targets");
     return true;
 }
 
@@ -242,16 +244,15 @@ main(int argc, char **argv) {
 
     /* Init target list (individual IPs, *NOT* subnets) from input file */
     IPList *iplist = NULL;
-    if (config.inlist) {
-      if (config.entire)
-        config.usage(argv[0]);
+    if (config.inlist or config.entire) {
       if (config.ipv6) 
-        iplist = new IPList6(config.maxttl, config.random_scan);
+        iplist = new IPList6(config.maxttl, config.random_scan, config.entire);
       else
-        iplist = new IPList4(config.maxttl, config.random_scan);
+        iplist = new IPList4(config.maxttl, config.random_scan, config.entire);
       /* randomize permutation key */
       iplist->setkey(config.seed);
-      iplist->read(config.inlist);
+      if (config.inlist) 
+        iplist->read(config.inlist);
     }
 
     /* Initialize subnet list and add subnets from args */
@@ -318,20 +319,12 @@ main(int argc, char **argv) {
 
     if (config.probe) {
         debug(LOW, ">> Probing begins.");
-        if (config.inlist) {
-            /* Normal mode of operation, using individual IPs from input file */
+        if (config.entire or config.inlist) {
+            /* individual IPs from input file or entire mode*/
             loop(&config, iplist, trace, tree, stats);
-        } else if (not config.entire) {
-            /* Normal mode of operation, using subnets from args */
-            loop(&config, subnetlist, trace, tree, stats);
         } else {
-            /* you better really, really, know what you're doing */
-            debug(LOW, "** Entire Internet mode starting in 10s...");
-            sleep(10);
-            if (config.ipv6)
-                internet6(&config, trace, tree, stats);
-            else
-                internet(&config, trace, tree, stats);
+            /* using subnets from args */
+            loop(&config, subnetlist, trace, tree, stats);
         } 
     }
 

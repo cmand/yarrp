@@ -3,7 +3,6 @@ SUBDIRS = utils
 bin_PROGRAMS = yarrp
 
 yarrp_SOURCES = \
-  entire.cpp \
   icmp.cpp \
   iplist.cpp \
   listener.cpp \

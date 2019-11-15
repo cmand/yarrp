@@ -37,7 +37,7 @@ class RandomSubnetList : public SubnetList {
 
 class IPList {
   public:
-  IPList(uint8_t _maxttl, bool _rand);
+  IPList(uint8_t _maxttl, bool _rand, bool _entire);
   virtual ~IPList() {};
   virtual uint32_t next_address(struct in_addr *in, uint8_t * ttl) = 0;
   virtual uint32_t next_address(struct in6_addr *in, uint8_t * ttl) = 0;
@@ -56,15 +56,17 @@ class IPList {
   uint8_t ttlbits;
   uint32_t ttlmask;
   bool rand;
+  bool entire;
 };
 
 class IPList4 : public IPList {
   public:
-  IPList4(uint8_t _maxttl, bool _rand) : IPList(_maxttl, _rand) {};
+  IPList4(uint8_t _maxttl, bool _rand, bool _entire) : IPList(_maxttl, _rand, _entire) {};
   virtual ~IPList4();
   uint32_t next_address(struct in_addr *in, uint8_t * ttl);
   uint32_t next_address_seq(struct in_addr *in, uint8_t * ttl);
   uint32_t next_address_rand(struct in_addr *in, uint8_t * ttl);
+  uint32_t next_address_entire(struct in_addr *in, uint8_t * ttl);
   uint32_t next_address(struct in6_addr *in, uint8_t * ttl) { return 0; };
   void read(std::istream& in);
   void seed();
@@ -75,7 +77,7 @@ class IPList4 : public IPList {
 
 class IPList6 : public IPList {
   public:
-  IPList6(uint8_t _maxttl, bool _rand) : IPList(_maxttl, _rand) {};
+  IPList6(uint8_t _maxttl, bool _rand, bool _entire) : IPList(_maxttl, _rand, _entire) {};
   virtual ~IPList6();
   uint32_t next_address(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address_seq(struct in6_addr *in, uint8_t * ttl);
