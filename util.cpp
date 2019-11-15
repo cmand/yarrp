@@ -28,6 +28,13 @@ tsdiffus(struct timeval *end, struct timeval *begin) {
     return diff;
 }
 
+double
+now(void) {
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    return (double)now.tv_sec + (double)now.tv_usec / 1000000.;
+}
+
 
 /**
  * Sigmoid function

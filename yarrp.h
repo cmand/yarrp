@@ -120,6 +120,7 @@ void *listener(void *args);
 void *listener6(void *args);
 uint32_t tsdiff(struct timeval *end, struct timeval *begin);
 uint32_t tsdiffus(struct timeval *end, struct timeval *begin);
+double now(void);
 uint8_t randuint8();
 bool checkRoot();
 void instanceLock();
