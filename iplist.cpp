@@ -1,7 +1,7 @@
 #include "yarrp.h"
 #include "random_list.h"
 
-IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) {
+IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) : seeded(false) {
   perm = NULL;
   permsize = 0;
   maxttl = _maxttl;
@@ -9,15 +9,14 @@ IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) {
   ttlmask = 0xffffffff >> (32 - ttlbits);
   rand = _rand;
   entire = _entire;
+  if (entire) 
+    permsize = UINT32_MAX;
   memset(key, 0, KEYLEN);
-  //std::cout << ">> MAXTTL: " << int(maxttl) << " TTLBits: " << int(ttlbits) << std::endl;
-  //printf("ttlmask: %02x\n", ttlmask);
 }
 
 void IPList::setkey(int seed) {
     debug(HIGH, ">> Randomizing, seed: " << seed);
     permseed(key, seed);
-    this->seed();
 }
 
 IPList4::~IPList4() {
@@ -38,11 +37,10 @@ void IPList4::seed() {
     permsize = targets.size() * maxttl;
     if (permsize < 1000000) 
       mode = PERM_MODE_PREFIX;
-  } else {
-    permsize = UINT32_MAX;
-  }
+  } 
   perm = cperm_create(permsize, mode, PERM_CIPHER_RC5, key, 16);
   assert(perm);
+  seeded = true;
 }
 
 void IPList6::seed() {
@@ -56,6 +54,7 @@ void IPList6::seed() {
   }
   perm = cperm_create(permsize, mode, PERM_CIPHER_SPECK, key, 8);
   assert(perm);
+  seeded = true;
 }
 
 /* Read list of input IPs */
@@ -81,8 +80,6 @@ void IPList4::read(std::istream& inlist) {
       fatal("** Couldn't parse IPv4 address: %s", line.c_str());
     targets.push_back(addr.s_addr);
   }
-  if (permsize == 0)
-    seed();
   debug(LOW, ">> IPv4 targets: " << targets.size());
 }
 
@@ -97,8 +94,6 @@ void IPList6::read(std::istream& inlist) {
       fatal("** Couldn't parse IPv6 address: %s", line.c_str());
     targets.push_back(addr);
   }  
-  if (permsize == 0)
-    seed();
   debug(LOW, ">> IPv6 targets: " << targets.size());
 }
 
@@ -134,7 +129,7 @@ uint32_t IPList4::next_address_seq(struct in_addr *in, uint8_t * ttl) {
 uint32_t IPList4::next_address_rand(struct in_addr *in, uint8_t * ttl) {
   static uint32_t next = 0;
 
-  if (permsize == 0)
+  if (not seeded)
     seed();
 
   if (PERM_END == cperm_next(perm, &next))
@@ -154,7 +149,7 @@ uint32_t IPList4::next_address_entire(struct in_addr *in, uint8_t * ttl) {
   static uint32_t host;
   static char *p;
 
-  if (permsize == 0)
+  if (not seeded)
     seed();
 
   p = (char *) &next;
@@ -203,7 +198,7 @@ uint32_t IPList6::next_address_seq(struct in6_addr *in, uint8_t * ttl) {
 uint32_t IPList6::next_address_rand(struct in6_addr *in, uint8_t * ttl) {
   static uint32_t next = 0;
 
-  if (permsize == 0)
+  if (not seeded)
     seed();
 
   if (PERM_END == cperm_next(perm, &next))

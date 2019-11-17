@@ -57,6 +57,7 @@ class IPList {
   uint32_t ttlmask;
   bool rand;
   bool entire;
+  bool seeded;
 };
 
 class IPList4 : public IPList {
