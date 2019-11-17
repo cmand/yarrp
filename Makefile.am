@@ -19,7 +19,13 @@ yarrp_SOURCES = \
   trace6.cpp \
   util.cpp \
   yarrp.cpp \
-  yconfig.cpp
+  yconfig.cpp \
+  libcperm/cperm.c \
+  libcperm/prefix.c \
+  libcperm/cycle.c \
+  libcperm/ciphers/rc5.c \
+  libcperm/ciphers/rc5-16.c \
+  libcperm/ciphers/speck.c
 
 include_HEADERS = \
   icmp.h \
@@ -33,7 +39,8 @@ include_HEADERS = \
   trace.h \
   ttlhisto.h \
   yarrp.h \
-  yconfig.h
+  yconfig.h \
+  libcperm/cperm.h
 
 man_MANS = \
   yarrp.1 

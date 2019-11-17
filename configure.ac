@@ -5,7 +5,7 @@
 AC_INIT([yarrp],[0.6],[yarrp@cmand.org])
 AC_CONFIG_SRCDIR([yarrp.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
-AM_INIT_AUTOMAKE([-Wall foreign])
+AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CANONICAL_HOST
@@ -17,12 +17,11 @@ AC_REVISION([m4_esyscmd_s([git describe --always])])
 AC_DEFINE(GITREV,"[m4_esyscmd_s([git describe --always])]", "Git revision")
 
 AX_PTHREAD([],AC_MSG_ERROR([Requires POSIX threading.]))
-LIBS="$PTHREAD_LIBS $LIBS"
+LIBS="$PTHREAD_LIBS"
 CXXFLAGS="$PTHREAD_CFLAGS $CXXFLAGS -I/usr/local/include"
 LDFLAGS="-L/usr/local/lib"
 
 AX_CHECK_ZLIB
-
 
 AC_MSG_RESULT(Determined host operating system: $host_os)
 case $host_os in
@@ -94,7 +93,6 @@ if test $sip_cv_type_in_addr_t = yes; then
   AC_DEFINE(HAVE_IN_ADDR_T,1,[Define to 1 if type in_addr_t is available.])
 fi[]
 
-
 # Check architecture endianness
 AC_C_BIGENDIAN
 if test "x$ac_cv_c_bigendian" = "xyes"; then
@@ -110,12 +108,6 @@ AC_SEARCH_LIBS([socket], [socket])
 # Don't need pcap on Linux since we can use recvfrom on raw socket
 AS_CASE([$host_os], [*linux*], , 
 	[AC_SEARCH_LIBS(pcap_close, pcap,, AC_MSG_ERROR(pcap library required))])
-
-AC_CHECK_HEADER([cperm.h],
-        AC_CHECK_LIB([cperm], [cperm_create], ,
-                AC_MSG_ERROR([libcperm required 
-                              (https://github.com/lancealt/libcperm)])),
-        AC_MSG_ERROR([libcperm required (https://github.com/lancealt/libcperm)]))
 
 AC_CONFIG_FILES([
 	Makefile
