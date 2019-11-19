@@ -49,6 +49,9 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_INTTYPES_H
+ #include <inttypes.h>
+#endif
 #ifdef HAVE_STDINT_H
  #include <stdint.h>
 #endif

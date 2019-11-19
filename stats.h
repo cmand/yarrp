@@ -13,7 +13,7 @@ class Stats {
     void terse(FILE *out) {
       gettimeofday(&end, NULL);
       float t = (float) tsdiff(&end, &start) / 1000.0;
-      fprintf(out, "# %llu/%llu (%2.1f%%), NBskip: %llu/%llu TBAout: %llu/%llu/%llu Bad: %llu Fill: %llu",
+      fprintf(out, "# %" PRId64 "/%" PRId64 " (%2.1f%%), NBskip: %" PRId64 "/%" PRId64 " TBAout: %" PRId64 "/%" PRId64 "/%" PRId64 " Bad: %" PRId64 " Fill: %" PRId64,
         count, to_probe, (float) count*100.0/to_probe,
         nbr_skipped, bgp_skipped, ttl_outside, 
         bgp_outside, adr_outside, baddst, fills);    
@@ -28,14 +28,14 @@ class Stats {
       char s[1000];
       strftime(s, 1000, "%a, %d %b %Y %T %z", p);
       fprintf(out, "# End: %s\n", s);
-      fprintf(out, "# Bad_Resp: %llu\n", baddst);
-      fprintf(out, "# Fills: %llu\n", fills);
-      fprintf(out, "# Outside_TTL: %llu\n", ttl_outside);
-      fprintf(out, "# Outside_BGP: %llu\n", bgp_outside);
-      fprintf(out, "# Outside_Addr: %llu\n", adr_outside);
-      fprintf(out, "# Skipped_Nbr: %llu\n", nbr_skipped);
-      fprintf(out, "# Skipped_BGP: %llu\n", bgp_skipped);
-      fprintf(out, "# Pkts: %llu\n", count);
+      fprintf(out, "# Bad_Resp: %" PRId64 "\n", baddst);
+      fprintf(out, "# Fills: %" PRId64 "\n", fills);
+      fprintf(out, "# Outside_TTL: %" PRId64 "\n", ttl_outside);
+      fprintf(out, "# Outside_BGP: %" PRId64 "\n", bgp_outside);
+      fprintf(out, "# Outside_Addr: %" PRId64 "\n", adr_outside);
+      fprintf(out, "# Skipped_Nbr: %" PRId64 "\n", nbr_skipped);
+      fprintf(out, "# Skipped_BGP: %" PRId64 "\n", bgp_skipped);
+      fprintf(out, "# Pkts: %" PRId64 "\n", count);
       fprintf(out, "# Elapsed: %2.2fs\n", t);
       fprintf(out, "# PPS: %2.2f\n", (float) count / t);
       fprintf(out, "#\n");
