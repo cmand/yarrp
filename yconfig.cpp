@@ -34,6 +34,7 @@ static struct option long_options[] = {
     {"verbose", no_argument, NULL, 'v'},
     {"testing", no_argument, NULL, 'T'},
     {"instance", required_argument, NULL, 'E'}, 
+    {"version", no_argument, NULL, 'V'}, 
     {NULL, 0, NULL, 0},
 };
 
@@ -67,7 +68,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
 #endif
     params["RTT_Granularity"] = val_t("us", true);
     params["Targets"] = val_t("entire", true);
-    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:P:Qr:RsS:t:vTZ:", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:P:Qr:RsS:t:vVTZ:", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
@@ -181,10 +182,12 @@ YarrpConfig::parse_opts(int argc, char **argv) {
                 usage(argv[0]);
             }
             break;
-        case 'h':
-        default:
+        case 'V':
             debug(OFF, ">> yarrp v" << VERSION);
             debug(OFF, ">> https://www.cmand.org/yarrp/");
+            exit(0);
+        case 'h':
+        default:
             usage(argv[0]);
         }
     }
