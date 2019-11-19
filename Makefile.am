@@ -40,7 +40,14 @@ include_HEADERS = \
   ttlhisto.h \
   yarrp.h \
   yconfig.h \
-  libcperm/cperm.h
+  libcperm/cperm.h \
+  libcperm/cperm-internal.h \
+  libcperm/cycle.h \
+  libcperm/feistel.h \
+  libcperm/prefix.h \
+  libcperm/ciphers/rc5-16.h \
+  libcperm/ciphers/rc5.h \
+  libcperm/ciphers/speck.h
 
 man_MANS = \
   yarrp.1 
