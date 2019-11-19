@@ -7,6 +7,7 @@ IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) : seeded(false) {
   maxttl = _maxttl;
   ttlbits = intlog(maxttl);
   ttlmask = 0xffffffff >> (32 - ttlbits);
+  ttlprefix = ttlmask ^ 0xff;
   rand = _rand;
   entire = _entire;
   if (entire) 
@@ -155,7 +156,7 @@ uint32_t IPList4::next_address_entire(struct in_addr *in, uint8_t * ttl) {
   p = (char *) &next;
   while (PERM_END != cperm_next(perm, &next)) {
     *ttl = next >> 24;            // use remaining 8 bits of perm as ttl
-    if ( (*ttl & 0xE0) != 0x0) { // fast check: ttls in [0,31]
+    if ( (*ttl & ttlprefix) != 0x0) { // fast check: ttls in [0,31]
       continue;
     }
     in->s_addr = next & 0x00FFFFFF;    // pick out 24 bits of network
@@ -205,6 +206,6 @@ uint32_t IPList6::next_address_rand(struct in6_addr *in, uint8_t * ttl) {
     return 0;
 
   *in = targets[next >> ttlbits];
-  *ttl = (next & ttlmask)  + 1;
+  *ttl = (next & ttlmask);
   return 1;
 }

@@ -108,6 +108,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             testing = true;
             break;
         case 'Q':
+            maxttl = 32;
             entire = true;
             break;
         case 'n':

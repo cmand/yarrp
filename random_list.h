@@ -55,6 +55,7 @@ class IPList {
   uint8_t maxttl;
   uint8_t ttlbits;
   uint32_t ttlmask;
+  uint32_t ttlprefix;
   bool rand;
   bool entire;
   bool seeded;
