@@ -7,7 +7,7 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd November 15, 2019
+.Dd November 19, 2019
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -102,7 +102,7 @@ The options to control TTLs probed are:
 .It Fl l Ar min_ttl
 set minimum TTL (default: 1)
 .It Fl m Ar max_ttl
-set maximum TTL (default: 16)
+set maximum TTL, must be a power of 2 (default: 16)
 .It Fl F Ar fill_ttl
 set fill mode maximum TTL (default: 32)
 .It Fl s
@@ -143,7 +143,7 @@ randomly permutes the space of targets and TTLs,
 thereby probing each target with TTLs from min_ttl to max_ttl in a random
 order.  Note that because of the way
 .Nm
-permutes the probe order, both min_ttl and max_ttl must be a power of two.
+permutes the probe order, max_ttl must be a power of two.
 .Pp
 Four options modify this behavior.  The sequential option
 (-s) disables random probing and instead probes sequentially.  The nbr_ttl
@@ -222,11 +222,6 @@ IPv6 targets in the file "targets6", and write the results to the file
 .%A "R. Beverly"
 .%T "Yarrp'ing the Internet: Randomized High-Speed Active Topology Discovery"
 .%O "Proc. ACM/SIGCOMM Internet Measurement Conference 2016"
-.Re
-.Rs
-.%A "E. Gaston"
-.%T "High-frequency mapping of the IPv6 Internet using Yarrp"
-.%O "NPS Master's Thesis (http://hdl.handle.net/10945/52982), 2017"
 .Re
 .Rs
 .%A "R. Beverly, R. Durairajan, D. Plonka, and J.P. Rohrer"
