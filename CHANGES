@@ -1,3 +1,16 @@
+yarrp-0.6
+---------
+* Add blocklist support
+* Option to accept targets from stdin
+* Option to export results to stdout 
+* Structured yrp output format
+* Instance locking
+* Fixed rate control
+* Add minimum TTL option
+* Fast C++ yrp2warts processor
+* Bundle libcperm
+* Misc stability fixes
+
 yarrp-0.5
 ---------
 * Add fill mode
