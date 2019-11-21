@@ -2,7 +2,7 @@
 # $Id: configure.ac $
 #
 
-AC_INIT([yarrp],[0.6],[yarrp@cmand.org])
+AC_INIT([yarrp],[0.7],[yarrp@cmand.org])
 AC_CONFIG_SRCDIR([yarrp.cpp])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE([-Wall foreign subdir-objects])
