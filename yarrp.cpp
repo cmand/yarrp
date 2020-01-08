@@ -228,6 +228,9 @@ main(int argc, char **argv) {
                 ll->setSrcMAC(&config.srcmac);
             if (not config.dstmac)
                 ll->setDstMAC(&config.dstmac);
+            if (config.srcmac == NULL || config.dstmac == NULL) {
+                fatal("unable to auto-interpret MAC addresses; use -M, -G");
+            }
         }
     }
     /* Init target list (individual IPs, *NOT* subnets) from input file */
