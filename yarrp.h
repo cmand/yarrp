@@ -74,7 +74,7 @@
 #include <map>
 #include <algorithm>
 
-#include "cperm.h" 
+#include "libcperm/cperm.h" 
 
 enum debugLevel {OFF, LOW, HIGH, DEBUG, DEVELOP};
 typedef enum {TR_ICMP6, TR_ICMP, TR_UDP6, TR_UDP,

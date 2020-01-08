@@ -12,7 +12,7 @@
 #include <pthread.h>
 #include <vector>
 #include <fstream>
-#include "cperm.h"
+#include "libcperm/cperm.h"
 
 #include "subnet_list.h"
 
