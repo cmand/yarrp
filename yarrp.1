@@ -3,11 +3,11 @@
 .\"
 .\" Author: Robert Beverly <rbeverly@cmand.org>
 .\"
-.\" Copyright (c) 2016-2019 Robert Beverly
+.\" Copyright (c) 2016-2020 Robert Beverly
 .\"                    All rights reserved
 .\"
 .\"
-.Dd November 19, 2019
+.Dd February 7, 2020
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -134,7 +134,7 @@ ASCII format as they are received, one response per line.  Because
 randomizes its probing, results will be similarly randomized.
 To determine all of the responses for a single target destination, it
 is necessary to filter and collate responses.  The included
-yrp2warts.py python utility performs this reconstitution and produces output
+yrp2warts utility (provided as both python and C++) performs this reconstitution and produces output
 in the standard warts binary format.
 .Sh TTLs
 By default, 
@@ -227,6 +227,16 @@ IPv6 targets in the file "targets6", and write the results to the file
 .%A "R. Beverly, R. Durairajan, D. Plonka, and J.P. Rohrer"
 .%T "In the IP of the Beholder: Strategies for Active IPv6 Topology Discovery"
 .%O "Proc. ACM/SIGCOMM Internet Measurement Conference 2018"
+.Re
+.Rs
+.%A "E. C. Rye, and R. Beverly"
+.%T "Discovering the IPv6 Network Periphery"
+.%O "Proc. Passive and Active Measurement 2020"
+.Re
+.Rs
+.%A "K. Vermeulen, et al."
+.%T "Diamond-Miner: Comprehensive Discovery of the Internet's Topology Diamonds"
+.%O "Proc. USENIX NSDI 2020"
 .Re
 .Sh AUTHORS
 .Nm
