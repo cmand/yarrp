@@ -65,6 +65,8 @@ listener(void *args) {
                     icmp->print();
                 /* ICMP message not from this yarrp instance, skip. */
                 if (icmp->getInstance() != trace->config->instance) {
+                    if (verbosity > HIGH)
+                        cerr << ">> Listener: packet instance mismatch." << endl;
                     delete icmp;
                     continue;
                 }

@@ -20,12 +20,12 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
     code = (uint8_t) icmp->icmp_code;
     ip_src = ip->ip_src;
 #ifdef _BSD
-    ipid = ip->ip_id;
+    replysize = ip->ip_len;
 #else
-    ipid = ntohs(ip->ip_id);
-#endif
-    replytos = ip->ip_tos;
     replysize = ntohs(ip->ip_len);
+#endif
+    ipid = ntohs(ip->ip_id);
+    replytos = ip->ip_tos;
     replyttl = ip->ip_ttl;
     unsigned char *ptr = NULL;
 
@@ -35,9 +35,13 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
         ptr = (unsigned char *) icmp;
         quote = (struct ip *) (ptr + 8);
         quote_p = quote->ip_p;
-        ttl = ntohs(quote->ip_id);
-        instance = ntohs(quote->ip_id) >> 8;
+#ifdef _BSD
+        probesize = quote->ip_len;
+#else
         probesize = ntohs(quote->ip_len);
+#endif
+        ttl = (ntohs(quote->ip_id)) & 0xFF;
+        instance = (ntohs(quote->ip_id) >> 8) & 0xFF;
 
         /* Original probe was TCP */
         if (quote->ip_p == IPPROTO_TCP) {
