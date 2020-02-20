@@ -192,6 +192,8 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             usage(argv[0]);
         }
     }
+    if (testing)
+        receive = false;
     if (not testing) {
         /* set default output file, if not set */
         if (not output) {
