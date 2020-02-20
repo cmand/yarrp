@@ -1,3 +1,11 @@
+typedef struct mpls_label {
+    uint32_t label:20;
+    uint8_t exp:4;
+    uint8_t ttl;
+    struct mpls_label *next;
+} mpls_label_t;
+#define MAX_MPLS_STACK_HEIGHT 4
+
 class ICMP {
     public:
     ICMP();
@@ -16,6 +24,7 @@ class ICMP {
     uint8_t  getInstance() { return instance; }
     void print(char *, char *, int);
     void write(FILE **, uint32_t, char *, char *);
+    char *getMPLS();
 
     protected:
     uint32_t rtt;
@@ -23,6 +32,7 @@ class ICMP {
     uint8_t instance;
     uint8_t type;
     uint8_t code;
+    uint8_t length;
     uint8_t quote_p;
     uint16_t sport;
     uint16_t dport;
@@ -33,6 +43,7 @@ class ICMP {
     uint8_t replytos;
     struct timeval tv;
     bool coarse;
+    mpls_label_t *mpls_stack;
 };
 
 class ICMP4 : public ICMP {
@@ -61,3 +72,4 @@ class ICMP6 : public ICMP {
     struct in6_addr ip_src;
     struct in6_addr *yarrp_target;
 };
+

@@ -6,7 +6,7 @@
 #include "yarrp.h"
 
 ICMP::ICMP() : 
-   rtt(0), ttl(0), type(0), code(0), quote_p(0), sport(0), dport(0), ipid(0),
+   rtt(0), ttl(0), type(0), code(0), length(0), quote_p(0), sport(0), dport(0), ipid(0),
    probesize(0), replysize(0), replyttl(0), replytos(0)
 {
     gettimeofday(&tv, NULL);
@@ -15,9 +15,11 @@ ICMP::ICMP() :
 ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): ICMP()
 {
     coarse = _coarse;
+    mpls_stack = NULL;
     memset(&ip_src, 0, sizeof(struct in_addr));
     type = (uint8_t) icmp->icmp_type;
     code = (uint8_t) icmp->icmp_code;
+
     ip_src = ip->ip_src;
 #ifdef _BSD
     replysize = ip->ip_len;
@@ -91,6 +93,43 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
         if (sport != sum) {
             cerr << "** IP dst in ICMP reply quote invalid!" << endl;
             sport = dport = 0;
+        }
+
+        /* Finally, does this ICMP packet have an extension (RFC4884)? */
+        length = (ntohl(icmp->icmp_void) & 0x00FF0000) >> 16;
+        length *= 4;
+        if ( (length > 0) and (replysize > length+8) ) {
+            //printf("*** ICMP Extension %d/%d\n", length, replysize);
+            ptr = (unsigned char *) icmp;
+            ptr += length+8;
+            if (length < 128) 
+                ptr += (128-length);
+            // ptr at start of ICMP extension
+            ptr += 4;
+            // ptr at start of MPLS stack header
+            ptr += 2;
+            // is this a class/type 1/1 (MPLS)?
+            if ( (*ptr == 0x01) and (*(ptr+1) == 0x01) ) {
+                ptr += 2;
+                uint32_t *tmp;
+                mpls_label_t *lse = (mpls_label_t *) calloc(1, sizeof(mpls_label_t) );
+                mpls_stack = lse;
+                for (int labels = 0; labels < MAX_MPLS_STACK_HEIGHT; labels++) {
+                    tmp = (uint32_t *) ptr;
+                    if (labels > 0) {
+                        mpls_label_t *nextlse = (mpls_label_t *) calloc(1, sizeof(mpls_label_t) );
+                        lse->next = nextlse;
+                        lse = nextlse;
+                    }
+                    lse->label = (htonl(*tmp) & 0xFFFFF000) >> 12;
+                    lse->exp   = (htonl(*tmp) & 0x00000F00) >> 8;
+                    lse->ttl   = (htonl(*tmp) & 0x000000FF);
+                    // bottom of stack?
+                    if (lse->exp & 0x01) 
+                        break;
+                    ptr+=4;
+                }
+            }
         }
     }
 }
@@ -188,6 +227,28 @@ void ICMP::print(char *src, char *dst, int sum) {
     if (sum) printf("\tCksum of probe dst: %d\n", sum);
 }
 
+
+char *
+ICMP::getMPLS() {
+    static char *mpls_label_string = (char *) calloc(1, PKTSIZE);
+    static char *label = (char *) calloc(1, PKTSIZE);
+    memset(mpls_label_string, 0, PKTSIZE);
+    memset(label, 0, PKTSIZE);
+    mpls_label_t *head = mpls_stack;
+    if (not head)
+        snprintf(mpls_label_string, PKTSIZE, "0");
+    while (head) {
+        //printf("**** LABEL: %d TTL: %d\n", head->label, head->ttl);
+        if (head->next)
+            snprintf(label, PKTSIZE, "%d:%d,", head->label, head->ttl);
+        else
+            snprintf(label, PKTSIZE, "%d:%d", head->label, head->ttl);
+        strcat(mpls_label_string, label);
+        head = head->next;
+    }
+    return mpls_label_string;
+}
+
 void 
 ICMP4::print() {
     char src[INET_ADDRSTRLEN];
@@ -201,6 +262,8 @@ ICMP4::print() {
     if (verbosity > HIGH) {
         printf(">> ICMP response:\n");
         ICMP::print(src, dst, sum);
+        if (mpls_stack)
+            printf("\t MPLS: [%s]\n", getMPLS());
     } else if (verbosity > LOW) {
         ICMP::printterse(src);
     }
@@ -234,6 +297,7 @@ void ICMP::write(FILE ** out, uint32_t count, char *src, char *target) {
         ttl, src, rtt, ipid);
     fprintf(*out, "%d %d %d %d ",
         probesize, replysize, replyttl, replytos);
+    fprintf(*out, "%s ", getMPLS());
     fprintf(*out, "%d\n", count);
 }
 
