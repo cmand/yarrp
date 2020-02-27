@@ -126,7 +126,7 @@ uint32_t tsdiffus(struct timeval *end, struct timeval *begin);
 double now(void);
 uint8_t randuint8();
 bool checkRoot();
-void instanceLock();
+void instanceLock(uint8_t);
 double decayprob(double t, uint32_t range);
 double decayprob(int32_t t, uint32_t range);
 double zrand();

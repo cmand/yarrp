@@ -216,7 +216,7 @@ main(int argc, char **argv) {
 
     /* Ensure we're the only Yarrp probing instance on this machine */
     if (config.probe)
-        instanceLock();
+        instanceLock(config.instance);
 
     /* Setup IPv6, if using (must be done before trace object) */
     if (config.ipv6) {

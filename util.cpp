@@ -116,7 +116,7 @@ uint32_t intlog(uint32_t in) {
 }
 
 /* Ensure that only one instance of Yarrp is running */
-void instanceLock() {
+void instanceLock(uint8_t instance) {
   const char *homedir = getenv("HOME");
   if (homedir) {
     char dotdir[1500];
@@ -126,7 +126,7 @@ void instanceLock() {
       mkdir(dotdir, 0755);
     }
     char lockfile[1500];
-    snprintf(lockfile, 1500, "%s/lock", dotdir);
+    snprintf(lockfile, 1500, "%s/lock.%d", dotdir, instance);
     int fd = open(lockfile, O_CREAT | O_RDWR, 0644);
     struct flock lock;
     memset(&lock, 0, sizeof(lock));
