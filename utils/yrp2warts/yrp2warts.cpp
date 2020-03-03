@@ -244,22 +244,23 @@ int main(int argc, char* argv[])
 		//hops.resize(distance(hops.begin(), thishop));
 		//cout << "Processing trace to " << target << endl;
 		uint16_t probehop;
-		/*if (hops.size() > stats.maxttl) {
+		if (hops.size() > stats.maxttl) {
+			//cout << "stats.maxttl is " << stats.maxttl << endl;
 			probehop = hops.size();
 		}
 		else {
 			probehop = stats.maxttl;
-		}*/
-		probehop = hops.size();
+		}
+		//probehop = hops.size();
 		//cout << "This trace has " << probehop << " hops." << endl;
 		double trace_timestamp = 0x1.fffffffffffffp+1023;
 		struct timeval tv;
 		uint8_t last_ttl = 0;
 		uint16_t dup_ttl_cnt = 1;
 		for (thishop = hops.begin(); thishop != hops.end(); ++thishop) {
-			/*if (thishop->ttl > probehop) {
+			if (thishop->ttl > probehop) {
 				probehop = thishop->ttl;
-			}*/
+			}
 			if (thishop->ttl == last_ttl) {
 				dup_ttl_cnt++;
 			}
