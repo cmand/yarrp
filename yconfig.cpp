@@ -46,12 +46,6 @@ uint8_t *read_mac(char *str) {
     return mac;
 }
 
-struct in6_addr *read_v6_src_addr(char *str) {
-    in6_addr *src = (in6_addr *) malloc(sizeof(in6_addr));
-    inet_pton(AF_INET6, str, src);
-    return src;
-}
-
 void
 YarrpConfig::parse_opts(int argc, char **argv) {
     int c, opt_index;
@@ -68,7 +62,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
 #endif
     params["RTT_Granularity"] = val_t("us", true);
     params["Targets"] = val_t("entire", true);
-    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:P:Qr:RsS:t:vVTZ:", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:PQr:RsS:t:vVTZ:", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
@@ -129,7 +123,6 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             params["Instance"] = val_t(to_string(instance), true);
             break;
         case 'P':
-            probesrc = optarg;
             receive = false;
             break;
         case 'R':
@@ -154,7 +147,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
             srcmac = read_mac(optarg);
             break;
         case 'a':
-            srcaddr = read_v6_src_addr(optarg);
+            probesrc = optarg;
             break;
         case 't':
             if (strcmp(optarg, "ICMP6") == 0) {
@@ -261,6 +254,7 @@ YarrpConfig::usage(char *prog) {
     << "  -c, --count             Probes to issue (default: unlimited)" << endl
     << "  -v, --verbose           verbose (default: off)" << endl
     << "  -S, --seed              Seed (default: random)" << endl
+    << "  -a, --srcaddr           Source address of probes (default: auto)" << endl
     << "  -p, --port              Transport dst port (default: 80)" << endl
     << "  -T, --test              Don't send probes (default: off)" << endl
     << "  -E, --instance          Prober instance (default: 0)" << endl
@@ -281,7 +275,6 @@ YarrpConfig::usage(char *prog) {
 
     << "IPv6 options:" << endl
     << "  -I, --interface         Network interface (required for IPv6)" << endl
-    << "  -a, --srcaddr           IPv6 address of probing host (default: auto)" << endl
     << "  -G, --dstmac            MAC of gateway router (default: auto)" << endl
     << "  -M, --srcmac            MAC of probing host (default: auto)" << endl
 

@@ -7,7 +7,7 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd February 7, 2020
+.Dd May 19, 2020
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -33,7 +33,7 @@
 .Op Fl n Ar nbr_ttl
 .Op Fl s Ar sequential
 .Op Fl Z Ar poisson
-.Op Fl a Ar ipv6_src
+.Op Fl a Ar src_addr
 .Op Fl I Ar interface
 .Op Fl M Ar src_mac
 .Op Fl G Ar dst_mac
@@ -87,6 +87,8 @@ set permutation random seed (default: timestamp)
 set instance (default: 0)
 .It Fl p Ar dst_port
 use specified transport destination port (default: 80)
+.It Fl a Ar src_addr
+set source IP address (default: auto)
 .El
 .Pp
 The target options are as follows:
@@ -119,8 +121,6 @@ The IPv6-specific options are as follows:
 network interface to use (required)
 .It Fl t Ar tr_type
 set probe type: ICMP6, UDP6, TCP6_SYN, TCP6_ACK (required)
-.It Fl a Ar ipv6_src
-set source IPv6 address (default: auto)
 .It Fl M Ar src_mac
 MAC address of source (required if auto discovery fails)
 .It Fl G Ar dst_mac

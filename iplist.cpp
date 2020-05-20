@@ -16,7 +16,7 @@ IPList::IPList(uint8_t _maxttl, bool _rand, bool _entire) : seeded(false) {
 }
 
 void IPList::setkey(int seed) {
-    debug(HIGH, ">> Randomizing, seed: " << seed);
+    debug(HIGH, ">> Seed: " << seed);
     permseed(key, seed);
 }
 
