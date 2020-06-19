@@ -25,6 +25,7 @@ class ICMP {
     void print(char *, char *, int);
     void write(FILE **, uint32_t, char *, char *);
     char *getMPLS();
+    bool is_yarrp;
 
     protected:
     uint32_t rtt;
@@ -61,7 +62,7 @@ class ICMP4 : public ICMP {
 
 class ICMP6 : public ICMP {
     public:
-    ICMP6(struct ip6_hdr *, struct icmp6_hdr *, struct ypayload *, uint32_t elapsed, bool _coarse);
+    ICMP6(struct ip6_hdr *, struct icmp6_hdr *, uint32_t elapsed, bool _coarse);
     struct in6_addr *getSrc6() { return &ip_src; }
     struct in6_addr quoteDst6();
     void print();
