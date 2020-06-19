@@ -7,7 +7,7 @@
 .\"                    All rights reserved
 .\"
 .\"
-.Dd May 19, 2020
+.Dd Jun 18, 2020
 .Dt YARRP 1
 .Os
 .Sh NAME
@@ -37,6 +37,7 @@
 .Op Fl I Ar interface
 .Op Fl M Ar src_mac
 .Op Fl G Ar dst_mac
+.Op Fl X Ar v6_eh
 .Op Ar subnet(s)
 .Sh DESCRIPTION
 .Nm
@@ -125,6 +126,8 @@ set probe type: ICMP6, UDP6, TCP6_SYN, TCP6_ACK (required)
 MAC address of source (required if auto discovery fails)
 .It Fl G Ar dst_mac
 MAC address of gateway router (required if auto discovery fails)
+.It Fl X Ar v6_eh
+Set extension header type to add (default: none)
 .El
 .Sh OUTPUT
 .Nm 

@@ -100,7 +100,6 @@ reloop:
             fatal("%s %s", __func__, strerror(errno));
         }
         ip = (struct ip6_hdr *)(buf + ETH_HDRLEN);
-            //and (ntohl(quotepayload->id) == 0x79727036)) {
         if (ip->ip6_nxt == IPPROTO_ICMPV6) {
             ippayload = (struct icmp6_hdr *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr)];
             elapsed = trace->elapsed();

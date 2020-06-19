@@ -1,5 +1,7 @@
 yarrp-0.7
 ---------
+* Add IPv6 EH support
+* Add ICMP MPLS extension support
 
 yarrp-0.6
 ---------

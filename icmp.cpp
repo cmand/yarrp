@@ -156,24 +156,37 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, uint32_t elapsed, bool 
      * IPv6 hdr
      * ICMP6 hdr                struct icmp6_hdr *icmp;         <- ptr
      *  IPv6 hdr                struct ip6_hdr *icmpip;
+     *  Ext hdr                 struct ip6_ext *eh; (if present)
      *  Probe transport hdr     struct tcphdr,udphdr,icmp6_hdr; 
      *  Yarrp payload           struct ypayload *qpayload;
      */
 
     unsigned char *ptr = (unsigned char *) icmp; 
     quote = (struct ip6_hdr *) (ptr + sizeof(struct icmp6_hdr));            /* Quoted IPv6 hdr */
+    struct ip6_ext *eh = NULL;                /* Pointer to any extension header */
     struct ypayload *qpayload = NULL;     /* Quoted ICMPv6 yrp payload */ 
+    uint16_t ext_hdr_len = 0;
     quote_p = quote->ip6_nxt;
+    int offset = 0;
 
-    if (quote_p == ICMP6_ECHO_REPLY) {
+    if (icmp->icmp6_type == ICMP6_ECHO_REPLY) {
         qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr));
     } else {
+        // handle frag EH
+        if (quote_p == 44) {
+            eh = (struct ip6_ext *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) );
+            ext_hdr_len = 8;
+            quote_p = eh->ip6e_nxt;
+        }
+
+        // continue processing
+        offset = sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + ext_hdr_len;
         if (quote_p == IPPROTO_TCP) {
-            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct tcphdr));
+            qpayload = (struct ypayload *) (ptr + offset + sizeof(struct tcphdr));
         } else if (quote_p == IPPROTO_UDP) {
-            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct udphdr));
+            qpayload = (struct ypayload *) (ptr + offset + sizeof(struct udphdr));
         } else if (quote_p == IPPROTO_ICMPV6) {
-            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr));
+            qpayload = (struct ypayload *) (ptr + offset + sizeof(struct icmp6_hdr));
         } else {
             warn("unknown quote\n");
             return;
@@ -196,15 +209,15 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, uint32_t elapsed, bool 
         (type == ICMP6_DST_UNREACH)) {
         probesize = ntohs(quote->ip6_plen);
         if (quote_p == IPPROTO_TCP) {
-            struct tcphdr *tcp = (struct tcphdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
+            struct tcphdr *tcp = (struct tcphdr *) (ptr + offset);
             sport = ntohs(tcp->th_sport);
             dport = ntohs(tcp->th_dport);
         } else if (quote_p == IPPROTO_UDP) {
-            struct udphdr *udp = (struct udphdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
+            struct udphdr *udp = (struct udphdr *) (ptr + offset);
             sport = ntohs(udp->uh_sport);
             dport = ntohs(udp->uh_dport);
         } else if (quote_p == IPPROTO_ICMPV6) {
-            struct icmp6_hdr *icmp6 = (struct icmp6_hdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
+            struct icmp6_hdr *icmp6 = (struct icmp6_hdr *) (ptr + offset);
             sport = ntohs(icmp6->icmp6_id);
             dport = ntohs(icmp6->icmp6_seq);
         }
