@@ -10,12 +10,12 @@ ICMP::ICMP() :
    probesize(0), replysize(0), replyttl(0), replytos(0)
 {
     gettimeofday(&tv, NULL);
+    mpls_stack = NULL;
 }
 
 ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): ICMP()
 {
     coarse = _coarse;
-    mpls_stack = NULL;
     memset(&ip_src, 0, sizeof(struct in_addr));
     type = (uint8_t) icmp->icmp_type;
     code = (uint8_t) icmp->icmp_code;
