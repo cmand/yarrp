@@ -90,6 +90,7 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     outip->ip6_hlim = ttl;
     outip->ip6_dst = addr;
 
+    uint16_t ext_hdr_len = 0;
     uint16_t transport_hdr_len = 0;
     switch(config->type) {
       case TR_ICMP6:
@@ -110,6 +111,13 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
         assert(false);
     } 
 
+    /* Shim in an extension header? */
+    if (config->v6_eh != 0) {
+        make_eh(outip->ip6_nxt);
+        outip->ip6_nxt = config->v6_eh; 
+        ext_hdr_len = 8;
+    }
+
     /* Populate a yarrp payload */
     payload->ttl = ttl;
     payload->fudge = 0;
@@ -117,22 +125,22 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     uint32_t diff = elapsed();
     payload->diff = diff;
     u_char *data = (u_char *)(frame + ETH_HDRLEN + sizeof(ip6_hdr) 
-                              + transport_hdr_len);
+                              + ext_hdr_len + transport_hdr_len);
     memcpy(data, payload, sizeof(struct ypayload));
 
     /* Populate transport header */
     packlen = transport_hdr_len + sizeof(struct ypayload);
-    make_transport();
+    make_transport(ext_hdr_len);
     /* Copy yarrp payload again, after changing fudge for cksum */
     memcpy(data, payload, sizeof(struct ypayload));
-    outip->ip6_plen = htons(packlen);
+    outip->ip6_plen = htons(packlen + ext_hdr_len);
 
     /* xmit frame */
     if (verbosity > HIGH) {
       cout << ">> " << Tr_Type_String[config->type] << " probe: ";
       probePrint(addr, ttl);
     }
-    uint16_t framelen = ETH_HDRLEN + sizeof(ip6_hdr) + packlen;
+    uint16_t framelen = ETH_HDRLEN + sizeof(ip6_hdr) + ext_hdr_len + packlen;
 #ifdef _LINUX
     if (sendto(sndsock, frame, framelen, 0, (struct sockaddr *)target,
         sizeof(struct sockaddr_ll)) < 0)
@@ -146,9 +154,19 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     pcount++;
 }
 
-void 
-Traceroute6::make_transport() {
+void
+Traceroute6::make_eh(uint8_t nxt) {
     void *transport = frame + ETH_HDRLEN + sizeof(ip6_hdr);
+    struct ip6_frag *eh = (struct ip6_frag *) transport;
+    eh->ip6f_nxt = nxt;  
+    eh->ip6f_reserved = 0;
+    eh->ip6f_offlg = 0;
+    eh->ip6f_ident = 0x8008;
+}
+
+void 
+Traceroute6::make_transport(int ext_hdr_len) {
+    void *transport = frame + ETH_HDRLEN + sizeof(ip6_hdr) + ext_hdr_len;
     uint16_t sum = in_cksum((unsigned short *)&(outip->ip6_dst), 16);
     if (config->type == TR_ICMP6) {
         struct icmp6_hdr *icmp6 = (struct icmp6_hdr *)transport;
