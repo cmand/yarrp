@@ -50,8 +50,6 @@ void *listener6(void *args) {
     uint32_t elapsed = 0;
     struct ip6_hdr *ip = NULL;                /* IPv6 hdr */
     struct icmp6_hdr *ippayload = NULL;       /* ICMP6 hdr */
-    struct ip6_hdr *icmpip = NULL;            /* Quoted IPv6 hdr */
-    struct ypayload *quotepayload = NULL;     /* Quoted ICMPv6 yrp payload */ 
     int rcvsock;                              /* receive (icmp) socket file descriptor */
 
     /* block until main thread says we're ready. */
@@ -102,44 +100,34 @@ reloop:
             fatal("%s %s", __func__, strerror(errno));
         }
         ip = (struct ip6_hdr *)(buf + ETH_HDRLEN);
-        quotepayload = NULL;
+            //and (ntohl(quotepayload->id) == 0x79727036)) {
         if (ip->ip6_nxt == IPPROTO_ICMPV6) {
             ippayload = (struct icmp6_hdr *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr)];
-            if (ippayload->icmp6_type == ICMP6_ECHO_REPLY) {
-                quotepayload = (struct ypayload *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr)];
-            } else {
-                icmpip = (struct ip6_hdr *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr)];
-                if (icmpip->ip6_nxt == IPPROTO_TCP) {
-                    quotepayload = (struct ypayload *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct tcphdr)];
-                } else if (icmpip->ip6_nxt == IPPROTO_UDP) {
-                    quotepayload = (struct ypayload *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct udphdr)];
-                } else if (icmpip->ip6_nxt == IPPROTO_ICMPV6) {
-                    quotepayload = (struct ypayload *)&buf[ETH_HDRLEN + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr)];
-                } else {
-                    continue;
-                }
-            }
             elapsed = trace->elapsed();
-            if ((ippayload->icmp6_type != ICMP6_ECHO_REQUEST) and (ntohl(quotepayload->id) == 0x79727036)) {
-                ICMP *icmp = new ICMP6(ip, ippayload, quotepayload, elapsed, trace->config->coarse);
-                if (verbosity > LOW)
-                    icmp->print();
-                /* Fill mode logic. */
-                if (trace->config->fillmode) {
-                    if ( (icmp->getTTL() >= trace->config->maxttl) and
-                         (icmp->getTTL() < trace->config->fillmode) ) {
-                        trace->stats->fills+=1;
-                        trace->probe(icmp->quoteDst6(), icmp->getTTL() + 1); 
+            if ( (ippayload->icmp6_type == ICMP6_TIME_EXCEEDED) or
+                 (ippayload->icmp6_type == ICMP6_DST_UNREACH) or
+                 (ippayload->icmp6_type == ICMP6_ECHO_REPLY) ) {
+                ICMP *icmp = new ICMP6(ip, ippayload, elapsed, trace->config->coarse);
+                if (icmp->is_yarrp) {
+                    if (verbosity > LOW)
+                        icmp->print();
+                    /* Fill mode logic. */
+                    if (trace->config->fillmode) {
+                        if ( (icmp->getTTL() >= trace->config->maxttl) and
+                          (icmp->getTTL() < trace->config->fillmode) ) {
+                         trace->stats->fills+=1;
+                         trace->probe(icmp->quoteDst6(), icmp->getTTL() + 1); 
+                        }
                     }
+                    icmp->write(&(trace->config->out), trace->stats->count);
+                    /* TTL tree histogram */
+                    if (trace->ttlhisto.size() > icmp->quoteTTL()) {
+                     ttlhisto = trace->ttlhisto[icmp->quoteTTL()];
+                     ttlhisto->add(icmp->getSrc6(), elapsed);
+                    }
+                    if (verbosity > DEBUG)
+                     trace->dumpHisto();
                 }
-                icmp->write(&(trace->config->out), trace->stats->count);
-                /* TTL tree histogram */
-                if (trace->ttlhisto.size() > icmp->quoteTTL()) {
-                    ttlhisto = trace->ttlhisto[icmp->quoteTTL()];
-                    ttlhisto->add(icmp->getSrc6(), elapsed);
-                }
-                if (verbosity > DEBUG)
-                    trace->dumpHisto();
                 delete icmp;
             }
         } 

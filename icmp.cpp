@@ -139,12 +139,11 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
  *
  * @param ip   Received IPv6 hdr
  * @param icmp Received ICMP6 hdr
- * @param qpayload Payload of quoted packet
  * @param elapsed Total running time
  */
-ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, struct ypayload *qpayload, 
-             uint32_t elapsed, bool _coarse) : ICMP()
+ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, uint32_t elapsed, bool _coarse) : ICMP()
 {
+    is_yarrp = false;
     coarse = _coarse;
     memset(&ip_src, 0, sizeof(struct in6_addr));
     type = (uint8_t) icmp->icmp6_type;
@@ -152,33 +151,59 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, struct ypayload *qpaylo
     ip_src = ip->ip6_src;
     replysize = ntohs(ip->ip6_plen);
     replyttl = ip->ip6_hlim;
+
+    /* Ethernet
+     * IPv6 hdr
+     * ICMP6 hdr                struct icmp6_hdr *icmp;         <- ptr
+     *  IPv6 hdr                struct ip6_hdr *icmpip;
+     *  Probe transport hdr     struct tcphdr,udphdr,icmp6_hdr; 
+     *  Yarrp payload           struct ypayload *qpayload;
+     */
+
+    unsigned char *ptr = (unsigned char *) icmp; 
+    quote = (struct ip6_hdr *) (ptr + sizeof(struct icmp6_hdr));            /* Quoted IPv6 hdr */
+    struct ypayload *qpayload = NULL;     /* Quoted ICMPv6 yrp payload */ 
+    quote_p = quote->ip6_nxt;
+
+    if (quote_p == ICMP6_ECHO_REPLY) {
+        qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr));
+    } else {
+        if (quote_p == IPPROTO_TCP) {
+            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct tcphdr));
+        } else if (quote_p == IPPROTO_UDP) {
+            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct udphdr));
+        } else if (quote_p == IPPROTO_ICMPV6) {
+            qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) + sizeof(struct icmp6_hdr));
+        } else {
+            warn("unknown quote\n");
+            return;
+        }
+    }
+
+    if (ntohl(qpayload->id) == 0x79727036) 
+        is_yarrp = true;
     ttl = qpayload->ttl;
     instance = qpayload->instance;
     yarrp_target = &(qpayload->target);
     uint32_t diff = qpayload->diff;
-    unsigned char *ptr = NULL;
     if (elapsed >= diff)
         rtt = elapsed - diff;
     else
         cerr << "** RTT decode, elapsed: " << elapsed << " encoded: " << diff << endl;
 
     /* ICMP6 echo replies only quote the yarrp payload, not the full packet! */
-    quote = NULL;
     if (((type == ICMP6_TIME_EXCEEDED) and (code == ICMP6_TIME_EXCEED_TRANSIT)) or
         (type == ICMP6_DST_UNREACH)) {
-        ptr = (unsigned char *) icmp;
-        quote = (struct ip6_hdr *) (ptr + sizeof(icmp6_hdr));
-        quote_p = quote->ip6_nxt;
         probesize = ntohs(quote->ip6_plen);
-        if (quote->ip6_nxt == IPPROTO_TCP) {
+        if (quote_p == IPPROTO_TCP) {
             struct tcphdr *tcp = (struct tcphdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
             sport = ntohs(tcp->th_sport);
             dport = ntohs(tcp->th_dport);
-        } else if (quote->ip6_nxt == IPPROTO_UDP) {
+        } else if (quote_p == IPPROTO_UDP) {
             struct udphdr *udp = (struct udphdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
             sport = ntohs(udp->uh_sport);
             dport = ntohs(udp->uh_dport);
-        } else if (quote->ip6_nxt == IPPROTO_ICMPV6) {
+        } else if (quote_p == IPPROTO_ICMPV6) {
             struct icmp6_hdr *icmp6 = (struct icmp6_hdr *) (ptr + sizeof(icmp6_hdr) + sizeof(struct ip6_hdr));
             sport = ntohs(icmp6->icmp6_id);
             dport = ntohs(icmp6->icmp6_seq);
