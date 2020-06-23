@@ -82,7 +82,8 @@ class Traceroute6 : public Traceroute {
 
     private:
     void make_transport(int);
-    void make_eh(uint8_t);
+    void make_frag_eh(uint8_t);
+    void make_hbh_eh(uint8_t);
     struct ip6_hdr *outip;
     uint8_t *frame;
     int pcount;

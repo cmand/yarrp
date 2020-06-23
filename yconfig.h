@@ -10,7 +10,7 @@ class YarrpConfig {
     dstport(80),
     ipv6(false), int_name(NULL), dstmac(NULL), srcmac(NULL), 
     coarse(false), fillmode(32), poisson(0),
-    probesrc(NULL), probe(true), receive(true), instance(0), v6_eh(0), out(NULL) {};
+    probesrc(NULL), probe(true), receive(true), instance(0), v6_eh(255), out(NULL) {};
 
   void parse_opts(int argc, char **argv); 
   void usage(char *prog);

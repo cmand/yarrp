@@ -172,8 +172,8 @@ ICMP6::ICMP6(struct ip6_hdr *ip, struct icmp6_hdr *icmp, uint32_t elapsed, bool 
     if (icmp->icmp6_type == ICMP6_ECHO_REPLY) {
         qpayload = (struct ypayload *) (ptr + sizeof(struct icmp6_hdr));
     } else {
-        // handle frag EH
-        if (quote_p == 44) {
+        // handle hop-by-hop (0), dest (60) and frag (44) extension headers
+        if ( (quote_p == 0) or (quote_p == 44) or (quote_p == 60) ) {
             eh = (struct ip6_ext *) (ptr + sizeof(struct icmp6_hdr) + sizeof(struct ip6_hdr) );
             ext_hdr_len = 8;
             quote_p = eh->ip6e_nxt;

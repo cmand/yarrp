@@ -82,7 +82,7 @@ class Yarrp:
     line = self.fd.readline()
     if len(line) == 0:
       return False
-    if line[0] == '#':
+    if line[0] == '#' and line.find(':') != -1:
       try:
         (key, value) = line[2:].strip().split(': ')
         #print "Key:", key, "Value:", value
@@ -106,7 +106,8 @@ class Yarrp:
         if key == 'Pkts':
           self.packets = int(value)
       except Exception, e:
-        print "Error:", e 
+        print "Error (next):", e 
+        print "line:", line
         pass
       return self.next()
     fields = line.strip().split()
@@ -126,8 +127,8 @@ class Yarrp:
         r['count'] = int(r['count'])
       # Ugh, occassionally the recorded rtt is impossible...
       rtt = r['rtt']
-      if self.us_granularity == False: 
-        rtt = rtt*1000
+      if self.us_granularity == True: 
+        rtt = rtt/1000.0
       if rtt < 0 or rtt > 4294967295: rtt = 0
       r['rtt'] = rtt
     except ValueError, e:

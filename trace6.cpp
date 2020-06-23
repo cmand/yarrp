@@ -112,8 +112,12 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
     } 
 
     /* Shim in an extension header? */
-    if (config->v6_eh != 0) {
-        make_eh(outip->ip6_nxt);
+    if (config->v6_eh != 255) {
+        if (config->v6_eh == 44) {
+            make_frag_eh(outip->ip6_nxt);
+        } else {
+            make_hbh_eh(outip->ip6_nxt);
+        }
         outip->ip6_nxt = config->v6_eh; 
         ext_hdr_len = 8;
     }
@@ -155,13 +159,27 @@ Traceroute6::probe(void *target, struct in6_addr addr, int ttl) {
 }
 
 void
-Traceroute6::make_eh(uint8_t nxt) {
+Traceroute6::make_frag_eh(uint8_t nxt) {
     void *transport = frame + ETH_HDRLEN + sizeof(ip6_hdr);
     struct ip6_frag *eh = (struct ip6_frag *) transport;
     eh->ip6f_nxt = nxt;  
     eh->ip6f_reserved = 0;
     eh->ip6f_offlg = 0;
     eh->ip6f_ident = 0x8008;
+}
+
+void
+Traceroute6::make_hbh_eh(uint8_t nxt) {
+    uint8_t *transport = frame + ETH_HDRLEN + sizeof(ip6_hdr);
+    struct ip6_ext *eh = (struct ip6_ext *) transport;
+    eh->ip6e_nxt = nxt;  
+    eh->ip6e_len = 0;
+    transport+=2;
+    struct ip6_opt *opt = (struct ip6_opt *) transport;
+    opt->ip6o_type = IP6OPT_PADN;
+    opt->ip6o_len = 4;
+    transport+=2;
+    memset(transport, 0, 4);
 }
 
 void 
