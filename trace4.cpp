@@ -110,7 +110,7 @@ Traceroute4::probeUDP(struct sockaddr_in *target, int ttl) {
     packlen = sizeof(struct ip) + sizeof(struct udphdr) + payloadlen;
 
     outip->ip_p = IPPROTO_UDP;
-#ifdef _BSD
+#if defined(_BSD) && !defined(_NEW_FBSD)
     outip->ip_len = packlen;
     outip->ip_off = IP_DF;
 #else
@@ -154,10 +154,11 @@ Traceroute4::probeTCP(struct sockaddr_in *target, int ttl) {
 
     packlen = sizeof(struct ip) + sizeof(struct tcphdr) + payloadlen;
     outip->ip_p = IPPROTO_TCP;
-    outip->ip_len = htons(packlen);
-#ifdef _BSD
+#if defined(_BSD) && !defined(_NEW_FBSD)
     outip->ip_len = packlen;
     outip->ip_off = 0; //IP_DF;
+#else
+    outip->ip_len = htons(packlen);
 #endif
     /* encode destination IPv4 address as cksum(ipdst) */
     uint16_t dport = in_cksum((unsigned short *)&(outip->ip_dst), 4);
@@ -208,9 +209,11 @@ Traceroute4::probeICMP(struct sockaddr_in *target, int ttl) {
     packlen = sizeof(struct ip) + ICMP_MINLEN + payloadlen;
     outip->ip_p = IPPROTO_ICMP;
     outip->ip_len = htons(packlen);
-#ifdef _BSD
+#if defined(_BSD) && !defined(_NEW_FBSD)
     outip->ip_len = packlen;
     outip->ip_off = 0; //IP_DF;
+#else
+    outip->ip_len = htons(packlen);
 #endif
     /* encode send time into icmp id and seq as elapsed milli/micro seconds */
     uint32_t diff = elapsed();

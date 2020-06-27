@@ -21,7 +21,7 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
     code = (uint8_t) icmp->icmp_code;
 
     ip_src = ip->ip_src;
-#ifdef _BSD
+#if defined(_BSD) && !defined(_NEW_FBSD)
     replysize = ip->ip_len;
 #else
     replysize = ntohs(ip->ip_len);
@@ -37,7 +37,7 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
         ptr = (unsigned char *) icmp;
         quote = (struct ip *) (ptr + 8);
         quote_p = quote->ip_p;
-#ifdef _BSD
+#if defined(_BSD) && !defined(_NEW_FBSD)
         probesize = quote->ip_len;
 #else
         probesize = ntohs(quote->ip_len);

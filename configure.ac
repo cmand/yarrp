@@ -28,6 +28,13 @@ case $host_os in
 *linux*)
     AC_DEFINE(OS,"LINUX",[Operating System String])
     AC_DEFINE(_LINUX,1,[Define to 1 if a Linux operating system]);;
+*freebsd*)
+    AC_DEFINE(OS,"FBSD",[Operating System String])
+    AC_DEFINE(_BSD,1,[Define to 1 if a BSD-like operating system])
+    freebsd_version=$(uname -K)
+    AX_COMPARE_VERSION($freebsd_version,[lt],[1100000],
+       AC_DEFINE(_OLD_BSD,1,[Define to 1 if Freebsd<11]),
+       AC_DEFINE(_NEW_FBSD,1,[Define to 1 if Freebsd>=11]));;
 *bsd*)
     AC_DEFINE(OS,"BSD",[Operating System String])
     AC_DEFINE(_BSD,1,[Define to 1 if a BSD-like operating system]);;
