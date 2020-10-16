@@ -14,7 +14,7 @@
 
 
 template < class TYPE >
-void 
+void
 loop(YarrpConfig * config, TYPE * iplist, Traceroute * trace,
      Patricia * tree, Stats * stats) {
     struct in_addr target;
@@ -261,9 +261,15 @@ main(int argc, char **argv) {
     Patricia *tree = NULL;
     if (config.bgpfile or config.blocklist) {
         if (config.ipv6) {
-            debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
             tree = new Patricia(128);
-            tree->populate6(config.bgpfile);
+            if (config.blocklist) {
+                debug(LOW, ">> Populating IPv6 blocklist: " << config.blocklist);
+                tree->populateBlock(AF_INET6, config.blocklist);
+            }
+            if (config.bgpfile) {
+                debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
+                tree->populate6(config.bgpfile);
+            }
         } else {
             tree = new Patricia(32);
             if (config.blocklist) {
