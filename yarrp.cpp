@@ -90,11 +90,18 @@ loop(YarrpConfig * config, TYPE * iplist, Traceroute * trace,
         /* Only send probe if destination is in BGP table */
         if (config->bgpfile or config->blocklist) {
             if (config->ipv6) {
-                if (tree->get(target6) == NULL) {
-                    inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
+				asn = (int *)tree->get(target6);
+				inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
+                if (asn == NULL) {
                     debug(DEBUG, "BGP Skip: " << ptarg << " TTL: " << (int)ttl);
                     stats->bgp_outside++;
                     continue;
+                }
+                if (*asn == 0) {
+                    debug(HIGH, ">> Address in blocklist: " << ptarg << " TTL: " << (int)ttl);
+                    continue;
+                } else {
+                    debug(DEBUG, ">> Prefix: " << ptarg << " ASN: " << *asn);
                 }
             } else {
                 asn = (int *)tree->get(target.s_addr);
@@ -269,6 +276,8 @@ main(int argc, char **argv) {
             if (config.bgpfile) {
                 debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
                 tree->populate6(config.bgpfile);
+            } else {
+                tree->add("::/0", 1);
             }
         } else {
             tree = new Patricia(32);
