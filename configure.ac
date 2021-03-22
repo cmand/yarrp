@@ -13,6 +13,13 @@ AC_PROG_CXX
 AC_LANG(C++)
 AX_CXX_COMPILE_STDCXX_11([],[])
 
+AX_CHECK_COMPILE_FLAG([-std=c99], [
+    CFLAGS+=" -std=c99"
+], [
+    echo "C compiler cannot compile C99 code"
+    exit -1
+])
+
 AC_REVISION([m4_esyscmd_s([git describe --always])])
 AC_DEFINE(GITREV,"[m4_esyscmd_s([git describe --always])]", "Git revision")
 
