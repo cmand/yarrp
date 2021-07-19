@@ -120,8 +120,8 @@ uint32_t IPList4::next_address_seq(struct in_addr *in, uint8_t * ttl) {
     last_ttl = 0;
     last_addr = *(iter);
   }
-  last_ttl+=1;
   *ttl = last_ttl;
+  last_ttl+=1;
   in->s_addr = last_addr;
   return 1;
 }

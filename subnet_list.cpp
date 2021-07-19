@@ -5,7 +5,7 @@ SubnetList::SubnetList(uint8_t _maxttl) : maxttl(_maxttl) {
     addr_count = 0;
     current_twentyfour = 0;
     current_48 = 0;
-    current_ttl = 1;
+    current_ttl = 0;
     ttlmask_bits = intlog(maxttl);
     ttlmask = (1 << ttlmask_bits) - 1;
 };
@@ -54,7 +54,7 @@ SubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
     cout << "Start: " << output << endl; 
     */
     if (++current_ttl > maxttl) {
-        current_ttl = 1;
+        current_ttl = 0;
         current_48 += 1;
     }
     if (current_48 >= (*current_subnet6).count()) {
@@ -72,7 +72,7 @@ SubnetList::next_address(struct in_addr *in, uint8_t * ttl) {
     in->s_addr = htonl((*current_subnet).first() + (current_twentyfour << 8) + getHost(0));
     *ttl = current_ttl;
     if (++current_ttl > maxttl) {
-        current_ttl = 1;
+        current_ttl = 0;
         current_twentyfour += 1;
     }
     if (current_twentyfour >= (*current_subnet).count()) {
