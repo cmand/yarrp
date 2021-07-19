@@ -74,7 +74,7 @@ RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
         subnet_count = (*iter).count() * maxttl;
         if (next >= current && next < current + subnet_count) {
             offset = next - current;
-            *ttl = (offset & ttlmask) + 1;
+            *ttl = (offset & ttlmask);
             // upper bits are offset into subnet
             int subnetoffset = (offset >> ttlmask_bits);
             //cout << "Subnetoffset: " << subnetoffset << endl;
