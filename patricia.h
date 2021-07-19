@@ -195,7 +195,7 @@ class Patricia {
     int matchingPrefix(const char *string);
 
     private:
-    int parseBGPLine(char *, std::string *, uint32_t *);
+    int parseBGPLine(char *, std::string *, uint32_t *, int *);
     int parsePrefix(char *, std::string *);
     void *get(prefix_t *prefix, bool exact);
     int matchingPrefix(prefix_t *prefix);
