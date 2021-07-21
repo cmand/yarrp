@@ -196,7 +196,7 @@ class Patricia {
 
     private:
     int parseBGPLine(char *, std::string *, uint32_t *, int *);
-    int parsePrefix(char *, std::string *);
+    int parsePrefix(int family, char *, std::string *);
     void *get(prefix_t *prefix, bool exact);
     int matchingPrefix(prefix_t *prefix);
     patricia_tree_t *tree;

@@ -1022,16 +1022,29 @@ int Patricia::matchingPrefix(const char *string, int family) {
     return matchingPrefix(prefix);
 }
 
-int Patricia::parsePrefix(char *_line, std::string *net) {
+int Patricia::parsePrefix(int family, char *_line, std::string *p) {
     std::string line(_line);
-    std::string::size_type first, last;
-    first = line.find_first_of("0123456789");
-    last = line.find_last_of("0123456789");
-    *net = line.substr(first,last-first+1);
-    if (net->find_first_not_of("0123456789./:") != std::string::npos) {
-        std::cerr << "Badly formed block prefix: [" << *net << "]" << std::endl;
+    // remove whitespace
+    line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+    std::string::size_type slash = line.find_first_of("/");
+    int mask = 0;
+    std::istringstream(line.substr(slash+1, line.length())) >> mask;
+    std::string net = line.substr(0,slash);
+    struct in_addr dummy;
+    if (family == AF_INET6) {
+      struct in6_addr dummy;
+      if ((inet_pton(AF_INET6, net.c_str(), &dummy) != 1) or (mask < 0) or (mask > 128)) {
+        std::cerr << "Badly formed IPv6 block prefix: [" << line << "]" << std::endl;
         exit(-1);
+      }
+    } else {
+      struct in_addr dummy;
+      if ((inet_pton(AF_INET, net.c_str(), &dummy) != 1) or (mask < 0) or (mask > 32)) {
+        std::cerr << "Badly formed IPv4 block prefix: [" << line << "]" << std::endl;
+        exit(-1);
+      }
     }
+    *p = line;
     return 1;
 }
 
@@ -1089,7 +1102,7 @@ void Patricia::populate(int family, const char *filename, bool block) {
     while (!gzeof(f)) {
         if (gzgets(f, line, MAXLINE) == NULL) break;
         if (block) {
-            if (parsePrefix(line, &network)) {
+            if (parsePrefix(family, line, &network)) {
                 //std::cout << "Block Prefix: " << network << std::endl;
                 add(family, network.c_str(), 0); 
             }
