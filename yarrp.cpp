@@ -277,7 +277,7 @@ main(int argc, char **argv) {
                 debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
                 tree->populate6(config.bgpfile);
             } else {
-                tree->add("::/0", 1);
+                tree->add(AF_INET6, "::/0", 1);
             }
         } else {
             tree = new Patricia(32);
@@ -302,7 +302,7 @@ main(int argc, char **argv) {
     else
         trace = new Traceroute4(&config, stats);
 
-    if (config.bgpfile)
+    if (config.bgpfile or config.blocklist) 
         trace->addTree(tree);
 
     /* Open output */
