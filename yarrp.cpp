@@ -266,32 +266,30 @@ main(int argc, char **argv) {
     }
     /* Initialize radix trie, if using */
     Patricia *tree = NULL;
-    if (config.bgpfile or config.blocklist) {
-        if (config.ipv6) {
-            tree = new Patricia(128);
-            if (config.blocklist) {
-                debug(LOW, ">> Populating IPv6 blocklist: " << config.blocklist);
-                tree->populateBlock(AF_INET6, config.blocklist);
-            }
-            if (config.bgpfile) {
-                debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
-                tree->populate6(config.bgpfile);
-            } else {
-                tree->add(AF_INET6, "::/0", 1);
-            }
+    if (config.ipv6) {
+        tree = new Patricia(128);
+        if (config.blocklist) {
+            debug(LOW, ">> Populating IPv6 blocklist: " << config.blocklist);
+            tree->populateBlock(AF_INET6, config.blocklist);
+        }
+        if (config.bgpfile) {
+            debug(LOW, ">> Populating IPv6 trie from: " << config.bgpfile);
+            tree->populate6(config.bgpfile);
         } else {
-            tree = new Patricia(32);
-            if (config.blocklist) {
-                debug(LOW, ">> Populating IPv4 blocklist: " << config.blocklist);
-                tree->populateBlock(AF_INET, config.blocklist);
-            }
-            if (config.bgpfile) {
+            tree->add(AF_INET6, "::/0", 1);
+        }
+    } else {
+        tree = new Patricia(32);
+        if (config.blocklist) {
+            debug(LOW, ">> Populating IPv4 blocklist: " << config.blocklist);
+            tree->populateBlock(AF_INET, config.blocklist);
+        }
+        if (config.bgpfile) {
                 debug(LOW, ">> Populating IPv4 trie from: " << config.bgpfile);
-                //tree->populateStatus(config.bgpfile);
-                tree->populate(config.bgpfile);
-            } else {
-                tree->add("0.0.0.0/0", 1);
-            }
+            //tree->populateStatus(config.bgpfile);
+            tree->populate(config.bgpfile);
+        } else {
+            tree->add("0.0.0.0/0", 1);
         }
     }
     /* Initialize traceroute engine, if not in test mode */
@@ -302,8 +300,7 @@ main(int argc, char **argv) {
     else
         trace = new Traceroute4(&config, stats);
 
-    if (config.bgpfile or config.blocklist) 
-        trace->addTree(tree);
+    trace->addTree(tree);
 
     /* Open output */
     if (config.receive) {
