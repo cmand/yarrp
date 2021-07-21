@@ -90,33 +90,23 @@ loop(YarrpConfig * config, TYPE * iplist, Traceroute * trace,
         /* Only send probe if destination is in BGP table */
         if (config->bgpfile or config->blocklist) {
             if (config->ipv6) {
-				asn = (int *)tree->get(target6);
-				inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
-                if (asn == NULL) {
-                    debug(DEBUG, "BGP Skip: " << ptarg << " TTL: " << (int)ttl);
-                    stats->bgp_outside++;
-                    continue;
-                }
-                if (*asn == 0) {
-                    debug(HIGH, ">> Address in blocklist: " << ptarg << " TTL: " << (int)ttl);
-                    continue;
-                } else {
-                    debug(DEBUG, ">> Prefix: " << ptarg << " ASN: " << *asn);
-                }
+                asn = (int *)tree->get(target6);
+                inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
             } else {
                 asn = (int *)tree->get(target.s_addr);
                 inet_ntop(AF_INET, &target, ptarg, INET6_ADDRSTRLEN);
-                if (asn == NULL) {
-                    debug(DEBUG, ">> BGP Skip: " << ptarg << " TTL: " << (int)ttl);
-                    stats->bgp_outside++;
-                    continue;
-                }
-                if (*asn == 0) {
-                    debug(HIGH, ">> Address in blocklist: " << ptarg << " TTL: " << (int)ttl);
-                    continue;
-                } else {
-                    debug(DEBUG, ">> Prefix: " << ptarg << " ASN: " << *asn);
-                }
+            }
+            if (asn == NULL) {
+                debug(DEBUG, "BGP Skip: " << ptarg << " TTL: " << (int)ttl);
+                stats->bgp_outside++;
+                continue;
+            }
+            if (*asn == 0) {
+                debug(HIGH, ">> Address in blocklist: " << ptarg << " TTL: " << (int)ttl);
+                continue;
+            } else {
+                debug(DEBUG, ">> Prefix: " << ptarg << " ASN: " << *asn);
+            }
 #if 0
                 status = (Status *) tree->get(target.s_addr);
                 if (status) {
@@ -126,7 +116,6 @@ loop(YarrpConfig * config, TYPE * iplist, Traceroute * trace,
                     continue;
                 }
 #endif
-            }
         }
         /* Passed all checks, continue and send probe */
         if (not config->testing) {
