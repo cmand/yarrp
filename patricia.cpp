@@ -1017,8 +1017,8 @@ int Patricia::matchingPrefix(uint32_t addr) {
     return matchingPrefix(prefix);
 }
 
-int Patricia::matchingPrefix(const char *string) {
-    prefix_t *prefix = ascii2prefix(AF_INET, string);
+int Patricia::matchingPrefix(const char *string, int family) {
+    prefix_t *prefix = ascii2prefix(family, string);
     return matchingPrefix(prefix);
 }
 
@@ -1099,7 +1099,7 @@ void Patricia::populate(int family, const char *filename, bool block) {
                 if (bgpfamily != family)
                   continue;
                 // lookup first, ensure prefix isn't contained in a blacklistd prefix
-                if ( matchingPrefix(network.c_str()) != 0 )
+                if ( matchingPrefix(network.c_str(), family) != 0 )
                   add(family, network.c_str(), asn); 
             }
         }

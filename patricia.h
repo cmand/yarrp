@@ -192,7 +192,7 @@ class Patricia {
     };
     void populateStatus(const char *filename);
     int matchingPrefix(uint32_t addr);
-    int matchingPrefix(const char *string);
+    int matchingPrefix(const char *string, int family);
 
     private:
     int parseBGPLine(char *, std::string *, uint32_t *, int *);
