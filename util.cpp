@@ -119,8 +119,8 @@ uint32_t intlog(uint32_t in) {
 void instanceLock(uint8_t instance) {
   const char *homedir = getenv("HOME");
   if (homedir) {
-    char dotdir[1500];
-    snprintf(dotdir, 1500, "%s/.yarrp", homedir);
+    char dotdir[1400];
+    snprintf(dotdir, 1400, "%s/.yarrp", homedir);
     struct stat st = {0};
     if (stat(dotdir, &st) == -1) {
       mkdir(dotdir, 0755);
