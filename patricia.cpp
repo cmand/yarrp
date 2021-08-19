@@ -19,6 +19,7 @@
 
 #include "patricia.h"
 #include "status.h"
+#include <algorithm>
 
 #ifdef TESTING
  #include <string>
@@ -1025,7 +1026,8 @@ int Patricia::matchingPrefix(const char *string, int family) {
 int Patricia::parsePrefix(int family, char *_line, std::string *p) {
     std::string line(_line);
     // remove whitespace
-    line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+    line.erase(std::remove(line.begin(), line.end(), '\n'), line.end());
+    line.erase(std::remove(line.begin(), line.end(), ' '), line.end());
     std::string::size_type slash = line.find_first_of("/");
     int mask = 0;
     std::istringstream(line.substr(slash+1, line.length())) >> mask;
