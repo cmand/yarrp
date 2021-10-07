@@ -22,7 +22,7 @@ class Subnet {
 
 class Subnet6 {
     public:
-    Subnet6(std::string s);
+    Subnet6(std::string s, uint8_t granularity);
     ~Subnet6();
     uint64_t count() {
         return cnt;

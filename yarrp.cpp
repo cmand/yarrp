@@ -245,9 +245,9 @@ main(int argc, char **argv) {
     SubnetList *subnetlist = NULL;
     if (not config.entire and not config.inlist and config.probe) {
         if (config.random_scan)
-            subnetlist = new RandomSubnetList(config.maxttl);
+            subnetlist = new RandomSubnetList(config.maxttl, config.granularity);
         else
-            subnetlist = new SubnetList(config.maxttl);
+            subnetlist = new SubnetList(config.maxttl, config.granularity);
         for (int i = optind; i < argc; i++)
             subnetlist->add_subnet(argv[i], config.ipv6);
         if (0 == subnetlist->count())

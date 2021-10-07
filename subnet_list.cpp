@@ -1,7 +1,7 @@
 #include "yarrp.h"
 #include "subnet_list.h"
 
-SubnetList::SubnetList(uint8_t _maxttl) : maxttl(_maxttl) {
+SubnetList::SubnetList(uint8_t _maxttl, uint8_t _gran) : maxttl(_maxttl), granularity(_gran) {
     addr_count = 0;
     current_twentyfour = 0;
     current_48 = 0;
@@ -16,7 +16,7 @@ SubnetList::~SubnetList() {
 void            
 SubnetList::add_subnet(string s, bool ipv6) {
     if (ipv6) {
-        Subnet6 subnet = Subnet6(s);
+        Subnet6 subnet = Subnet6(s, granularity);
         subnets6.push_back(subnet);
         current_subnet6 = subnets6.begin();
         addr_count += subnet.count() * maxttl;

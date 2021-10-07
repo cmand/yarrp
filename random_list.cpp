@@ -1,7 +1,7 @@
 #include "yarrp.h"
 #include "random_list.h"
 
-RandomSubnetList::RandomSubnetList(uint8_t _maxttl):SubnetList(_maxttl) {
+RandomSubnetList::RandomSubnetList(uint8_t _maxttl, uint8_t _gran):SubnetList(_maxttl, _gran) {
     seeded = false;
     perm = NULL;
 }
@@ -31,7 +31,8 @@ RandomSubnetList::seed() {
 uint32_t        
 RandomSubnetList::next_address(struct in_addr *in, uint8_t *ttl) {
     list < Subnet >::iterator iter;
-    uint32_t next, subnet_count, current = 0;
+    uint32_t next;
+    uint32_t subnet_count, current = 0;
     uint32_t addr, offset;
 
     if (!seeded)
@@ -60,9 +61,10 @@ RandomSubnetList::next_address(struct in_addr *in, uint8_t *ttl) {
 uint32_t        
 RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
     list < Subnet6 >::iterator iter;
-    uint32_t next, subnet_count, current = 0;
+    uint32_t next;
+    uint32_t subnet_count, current = 0;
     uint32_t offset;
-    char output[INET6_ADDRSTRLEN];
+    uint64_t high, iid = 0;
 
     if (!seeded)
         seed();
@@ -77,21 +79,20 @@ RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
             *ttl = (offset & ttlmask);
             // upper bits are offset into subnet
             int subnetoffset = (offset >> ttlmask_bits);
-            //cout << "Subnetoffset: " << subnetoffset << endl;
-            int word0 = subnetoffset / 65536;
-            int word1 = subnetoffset % 65536;
-              
-            //struct in6_addr *in = (*iter).first(); 
             memcpy(in, (*iter).first(), sizeof(struct in6_addr));
-            inet_ntop(AF_INET6, in, output, INET6_ADDRSTRLEN); 
-            //cout << "Using first: " << output << endl; 
+            //char output[INET6_ADDRSTRLEN];
+            //inet_ntop(AF_INET6, in, output, INET6_ADDRSTRLEN); 
+            //cout << "Using first as base: " << output << endl; 
 
-            (*in).s6_addr32[0] += htonl(word0);
-            (*in).s6_addr32[1] += htonl(word1<<16);
-            (*in).s6_addr32[3] += htonl(getHost((uint8_t *)in));
+            high = (subnetoffset << (64-granularity));
+            (*in).s6_addr32[0] += htonl( (high & 0xFFFFFFFF00000000) >> 32);
+            (*in).s6_addr32[1] += htonl( (high & 0x00000000FFFFFFFF));
 
-            inet_ntop(AF_INET6, in, output, INET6_ADDRSTRLEN); 
-            //cout << "Using: " << output << endl; 
+            iid = rndIID((uint32_t *)in);
+            (*in).s6_addr32[2] += htonl( (iid & 0xFFFFFFFF00000000) >> 32);
+            (*in).s6_addr32[3] += htonl( (iid & 0x00000000FFFFFFFF));
+
+            //(*in).s6_addr32[3] = htons(1);
             return 1;
         }
         current += subnet_count;
@@ -103,4 +104,12 @@ uint16_t
 RandomSubnetList::getHost(uint8_t *addr) {
     uint16_t sum = addr[0] + addr[1] + addr[2] + addr[3] + 127;
     return sum & 0xff;
+}
+
+uint64_t
+RandomSubnetList::rndIID(uint32_t *addr) {
+    uint64_t sum = random();
+    sum = (sum<<32);
+    sum += random() ^ (addr[0] + addr[1]);
+    return sum;
 }

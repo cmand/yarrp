@@ -43,6 +43,7 @@ class YarrpConfig {
   bool receive;
   uint8_t instance;
   uint8_t v6_eh;
+  uint8_t granularity;
   FILE *out;   /* output file stream */
   params_t params;
 

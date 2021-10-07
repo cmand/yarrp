@@ -16,7 +16,7 @@ using namespace std;
 
 class SubnetList {
     public:
-        SubnetList(uint8_t maxttl);
+        SubnetList(uint8_t maxttl, uint8_t gran);
         virtual ~SubnetList();
         virtual void add_subnet(string s, bool ipv6);
         virtual uint32_t next_address(struct in_addr *in, uint8_t *ttl);
@@ -28,6 +28,7 @@ class SubnetList {
         list<Subnet6> subnets6;
         uint32_t addr_count;
         uint8_t maxttl;
+        uint8_t granularity;
         uint32_t ttlmask_bits;
         uint32_t ttlmask;
 

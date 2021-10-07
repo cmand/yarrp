@@ -34,6 +34,7 @@ static struct option long_options[] = {
     {"verbose", no_argument, NULL, 'v'},
     {"testing", no_argument, NULL, 'T'},
     {"instance", required_argument, NULL, 'E'}, 
+    {"granularity", required_argument, NULL, 'g'},
     {"v6eh", no_argument, NULL, 'X'}, 
     {"version", no_argument, NULL, 'V'}, 
     {NULL, 0, NULL, 0},
@@ -63,7 +64,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
 #endif
     params["RTT_Granularity"] = val_t("us", true);
     params["Targets"] = val_t("entire", true);
-    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:hi:I:l:m:M:n:o:p:PQr:RsS:t:vVTX:Z:", long_options, &opt_index))) {
+    while (-1 != (c = getopt_long(argc, argv, "a:b:B:c:CE:F:G:g:hi:I:l:m:M:n:o:p:PQr:RsS:t:vVTX:Z:", long_options, &opt_index))) {
         switch (c) {
         case 'b':
             bgpfile = optarg;
@@ -150,6 +151,9 @@ YarrpConfig::parse_opts(int argc, char **argv) {
         case 'a':
             probesrc = optarg;
             break;
+        case 'g':
+            granularity = strtol(optarg, &endptr, 10);
+            break;
         case 't':
             if (strcmp(optarg, "ICMP6") == 0) {
                 ipv6 = true;
@@ -221,6 +225,7 @@ YarrpConfig::parse_opts(int argc, char **argv) {
     params["Trace_Type"] = val_t(Tr_Type_String[type], true);
     if (ipv6) {
         params["v6_EH"] = val_t(to_string(v6_eh), true);
+        params["Granularity"] = val_t(to_string(granularity), true);
     }
     params["Start"] = val_t("unknown", true);
     params["Fill_Mode"] = val_t(to_string(fillmode), true);
@@ -284,6 +289,7 @@ YarrpConfig::usage(char *prog) {
     << "  -I, --interface         Network interface (required for IPv6)" << endl
     << "  -G, --dstmac            MAC of gateway router (default: auto)" << endl
     << "  -M, --srcmac            MAC of probing host (default: auto)" << endl
+    << "  -g, --granularity       Granularity to probe input subnets (default: 50)" << endl
     << "  -X, --v6eh              Ext Header number to add (default: none)" << endl
 
 /* Undocumented options */

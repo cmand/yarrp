@@ -20,7 +20,7 @@ using namespace std;
 
 class RandomSubnetList : public SubnetList {
   public:
-  RandomSubnetList(uint8_t _maxttl);
+  RandomSubnetList(uint8_t _maxttl, uint8_t _gran);
   ~RandomSubnetList();
 
   uint32_t rand(uint32_t min, uint32_t max);
@@ -30,6 +30,7 @@ class RandomSubnetList : public SubnetList {
 
   private:
   uint16_t getHost(uint8_t *addr);
+  uint64_t rndIID(uint32_t *addr);
   uint8_t key[32];
   bool seeded;
   cperm_t* perm;
@@ -51,7 +52,7 @@ class IPList {
   uint8_t log2(uint8_t x);
   uint8_t key[KEYLEN];
   cperm_t* perm;
-  uint32_t permsize;
+  uint64_t permsize;
   uint8_t maxttl;
   uint8_t ttlbits;
   uint32_t ttlmask;
@@ -84,6 +85,7 @@ class IPList6 : public IPList {
   uint32_t next_address(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address_seq(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address_rand(struct in6_addr *in, uint8_t * ttl);
+  uint32_t next_address_entire(struct in6_addr *in, uint8_t * ttl);
   uint32_t next_address(struct in_addr *in, uint8_t * ttl) { return 0; };
   void read(std::istream& in);
   void seed();

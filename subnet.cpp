@@ -34,7 +34,7 @@ Subnet::Subnet(string s) {
     free(p);
 }
 
-Subnet6::Subnet6(string s) {
+Subnet6::Subnet6(string s, uint8_t granularity) {
     uint8_t m;
     char *p = strdup(s.c_str());
     if (2 == sscanf(s.c_str(), "%[a-fA-F0-9:]/%hhu", p, &m)) {
@@ -43,17 +43,16 @@ Subnet6::Subnet6(string s) {
             fatal("Error parsing IPv6 address: %s", p);
         }
         smask = m;
-        /* we divide everything into /48s */
-        if (smask > 48) {
-            fatal("IPv6 Prefix must be /48 or smaller!");
+        if (smask > 64) {
+            fatal("IPv6 prefix must be at least /64 or larger!");
         }
-        cnt = 1 << (48-m);
+        cnt = 1 << (granularity-m);
 
         /* four 32-bits words in ipv6 address; which one is subnet boundary */
         uint8_t boundary_word = m / 32;
         uint8_t boundary_mask = m % 32;
-        //char output[INET6_ADDRSTRLEN];
-        //inet_ntop(AF_INET6, &start, output, INET6_ADDRSTRLEN); 
+        char output[INET6_ADDRSTRLEN];
+        inet_ntop(AF_INET6, &start, output, INET6_ADDRSTRLEN); 
         //cout << "Start: " << output << endl; 
         //cout << "boundary word:" << (int) boundary_word << endl;
         //cout << "boundary mask:" << (int) boundary_mask << endl;
@@ -64,7 +63,7 @@ Subnet6::Subnet6(string s) {
         //printf("MASK: %08x\n", NETMASKS[boundary_mask]);
         start.s6_addr32[boundary_word] = htonl( ntohl(start.s6_addr32[boundary_word]) & NETMASKS[boundary_mask] );
         //printf("WORD: %08x\n", ntohl(start.s6_addr32[boundary_word]));
-        //inet_ntop(AF_INET6, &start, output, INET6_ADDRSTRLEN); 
+        inet_ntop(AF_INET6, &start, output, INET6_ADDRSTRLEN); 
         //cout << "Start: " << output << endl; 
 
         memcpy(&end, &start, sizeof(struct in6_addr));
@@ -72,7 +71,7 @@ Subnet6::Subnet6(string s) {
           end.s6_addr32[i] += NETMASKS[32];
         }
         end.s6_addr32[boundary_word] += htonl( (1 << (32-boundary_mask))-1);
-        //inet_ntop(AF_INET6, &end, output, INET6_ADDRSTRLEN); 
+        inet_ntop(AF_INET6, &end, output, INET6_ADDRSTRLEN); 
         //cout << "End: " << output << endl; 
     } else {
         fatal("Error parsing IPv6 subnet: %s", s.c_str());
