@@ -190,7 +190,7 @@ sane(YarrpConfig * config) {
         fatal("min_ttl must be less than or equal max_ttl");
     if ((config->fillmode > 0) and(config->fillmode < config->maxttl))
         fatal("Fill mode TTL must be larger than max_ttl");
-    if (config->ipv6) {
+    if (config->ipv6 and not config->testing) {
         if (config->int_name == NULL)
             fatal("IPv6 requires specifying an interface");
     }
@@ -215,7 +215,7 @@ main(int argc, char **argv) {
         instanceLock(config.instance);
 
     /* Setup IPv6, if using (must be done before trace object) */
-    if (config.ipv6) {
+    if (config.ipv6 and not config.testing) {
         if (config.srcmac == NULL || config.dstmac == NULL) {
             LLResolv *ll = new LLResolv();
             ll->gateway();

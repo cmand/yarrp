@@ -6,6 +6,7 @@
 #include "yarrp.h"
 
 Traceroute6::Traceroute6(YarrpConfig *_config, Stats *_stats) : Traceroute(_config, _stats) {
+    if (config->testing) return;
     memset(&source6, 0, sizeof(struct sockaddr_in6));
     if (config->probesrc) {
         source6.sin6_family = AF_INET6;
