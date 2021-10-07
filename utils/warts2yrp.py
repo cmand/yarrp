@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2018, Robert Beverly
 # All rights reserved.
@@ -36,7 +36,7 @@ from datetime import datetime
 try:
   from sc_warts import WartsReader
 except:
-  print "Requires sc_warts.py from https://github.com/cmand/scamper/"
+  print("Requires sc_warts.py from https://github.com/cmand/scamper/")
   sys.exit(-1)
 
 
@@ -49,7 +49,7 @@ def main():
   w = WartsReader(args.input, verbose=False)
   fd = open(args.output, 'w')
 
-  print ">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+  print(">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
   # target, sec, usec, type, code, ttl, hop, rtt, ipid, psize, rsize, rttl, rtos, count
   count = 0
   while True:
@@ -68,14 +68,14 @@ def main():
       (psize, rsize) = (hop['probesize'], hop['replysize'])
       rtos = hop['tos']
       yrpline = [target, sec, usec, typ, code, ttl, router, rtt, ipid, psize, rsize, rttl, rtos, count]
-      line = ", ".join([str(x) for x in yrpline])
+      line = " ".join([str(x) for x in yrpline])
       fd.write(line + "\n")
     probes_with_no_response = flags['probesent'] - len(hops)
     count += probes_with_no_response 
 
   fd.close()
-  print ">> Processed: %d probes" % count
-  print ">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+  print(">> Processed: %d probes" % count)
+  print(">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
 
 if __name__ == "__main__":
   main()
