@@ -71,7 +71,7 @@ int perm_speck_destroy(struct cperm_t* pt) {
     return 0;
 }
 
-int perm_speck_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
+int perm_speck_enc(struct cperm_t* perm, uint64_t pt, uint64_t* ct) {
     struct speck_data* d = perm->cipher_data;
 
     SPECK_TYPE *plain = (SPECK_TYPE *) &pt;
@@ -81,7 +81,7 @@ int perm_speck_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
     return 0;
 }
 
-int perm_speck_dec(struct cperm_t* perm, uint32_t ct, uint32_t* pt) {
+int perm_speck_dec(struct cperm_t* perm, uint64_t ct, uint64_t* pt) {
     struct speck_data* d = perm->cipher_data;
 
     SPECK_TYPE *enc = (SPECK_TYPE *) &ct;

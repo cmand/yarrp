@@ -46,10 +46,10 @@ static struct ModeFuncs available_modes[] = {
 static struct CipherFuncs available_ciphers[] = {
 	{ PERM_CIPHER_RC5,		perm_rc5_create,	perm_rc5_enc,		perm_rc5_dec,		perm_rc5_destroy },
 	{ PERM_CIPHER_SPECK,		perm_speck_create,	perm_speck_enc,		perm_speck_dec,		perm_speck_destroy },
-	{ PERM_CIPHER_ERROR,		NULL,			NULL },
+	{ PERM_CIPHER_ERROR,		NULL,			NULL,   NULL },
 };
 
-struct cperm_t* cperm_create(uint32_t range, PermMode m, PermCipher a, uint8_t* key, int key_len) {
+struct cperm_t* cperm_create(uint64_t range, PermMode m, PermCipher a, uint8_t* key, int key_len) {
 	struct cperm_t* perm = calloc(sizeof(*perm), 1);
 	if(!perm) {
 		cperm_errno = PERM_ERROR_NOMEM;
@@ -127,18 +127,18 @@ void cperm_destroy(struct cperm_t* perm) {
 	}
 }
 
-int cperm_next(struct cperm_t* perm, uint32_t* ct) {
+int cperm_next(struct cperm_t* perm, uint64_t* ct) {
 	if(!perm) { return PERM_ERROR_BAD_HANDLE; }
 	perm->position++;
 	return perm->mode->next(perm, ct);
 }
 
-int cperm_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
+int cperm_enc(struct cperm_t* perm, uint64_t pt, uint64_t* ct) {
 	if(!perm) { return PERM_ERROR_BAD_HANDLE; }
 	return perm->mode->get(perm, pt, ct);
 }
 
-uint32_t cperm_dec(struct cperm_t* cperm, uint32_t pt) {
+uint64_t cperm_dec(struct cperm_t* cperm, uint64_t pt) {
 	return 0;
 }
 
@@ -154,12 +154,12 @@ int cperm_reset(struct cperm_t* perm) {
 	return 1;
 }
 
-uint32_t cperm_get_range(const struct cperm_t* perm) {
+uint64_t cperm_get_range(const struct cperm_t* perm) {
 	if(!perm) { return 0; }
 	return perm->range;
 }
 
-uint32_t cperm_get_position(const struct cperm_t* perm) {
+uint64_t cperm_get_position(const struct cperm_t* perm) {
 	if(!perm) { return 0; }
 	return perm->position;
 }

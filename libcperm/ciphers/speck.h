@@ -89,8 +89,8 @@ void speck_decrypt_combined(SPECK_TYPE const ct[static 2], SPECK_TYPE pt[static 
 
 int perm_speck_create(struct cperm_t *pt);
 int perm_speck_destroy(struct cperm_t* pt);
-int perm_speck_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct);
-int perm_speck_dec(struct cperm_t* perm, uint32_t ct, uint32_t* pt);
+int perm_speck_enc(struct cperm_t* perm, uint64_t pt, uint64_t* ct);
+int perm_speck_dec(struct cperm_t* perm, uint64_t ct, uint64_t* pt);
 
 #ifdef __cplusplus
 }

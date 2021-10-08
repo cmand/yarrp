@@ -27,18 +27,18 @@
 #include "cperm.h"
 
 struct prefix_element {
-	uint32_t pt;
-	uint32_t ct;
+	uint64_t pt;
+	uint64_t ct;
 };
 
 struct prefix_data_t {
 	struct prefix_element* vector;
-	uint32_t next;
+	uint64_t next;
 };
 
 int perm_prefix_create(struct cperm_t* perm);
-int perm_prefix_get(struct cperm_t* perm, uint32_t pt, uint32_t* ct);
-int perm_prefix_next(struct cperm_t* perm, uint32_t* ct);
+int perm_prefix_get(struct cperm_t* perm, uint64_t pt, uint64_t* ct);
+int perm_prefix_next(struct cperm_t* perm, uint64_t* ct);
 int perm_prefix_destroy(struct cperm_t* perm);
 
 #endif /* PREFIX_H */

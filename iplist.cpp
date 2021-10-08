@@ -128,25 +128,27 @@ uint32_t IPList4::next_address_seq(struct in_addr *in, uint8_t * ttl) {
 
 /* random next address */
 uint32_t IPList4::next_address_rand(struct in_addr *in, uint8_t * ttl) {
-  static uint32_t next = 0;
+  static uint64_t next = 0;
+  static uint32_t next32 = 0;
 
   if (not seeded)
     seed();
 
   if (PERM_END == cperm_next(perm, &next))
     return 0;
-
-  in->s_addr = targets[next >> ttlbits];
+  next32 = next % 0xffffffff;
+  in->s_addr = targets[next32 >> ttlbits];
   if (ttlbits == 0)
     *ttl = 0;
   else
-    *ttl = (next & ttlmask);
+    *ttl = (next32 & ttlmask);
   return 1;
 }
 
 /* Internet-wide scanning mode */
 uint32_t IPList4::next_address_entire(struct in_addr *in, uint8_t * ttl) {
-  static uint32_t next = 0;
+  static uint64_t next = 0;
+  static uint32_t next32 = 0;
   static uint32_t host;
   static char *p;
 
@@ -155,11 +157,12 @@ uint32_t IPList4::next_address_entire(struct in_addr *in, uint8_t * ttl) {
 
   p = (char *) &next;
   while (PERM_END != cperm_next(perm, &next)) {
-    *ttl = next >> 24;            // use remaining 8 bits of perm as ttl
+    next32 = next % 0xffffffff;
+    *ttl = next32 >> 24;            // use remaining 8 bits of perm as ttl
     if ( (*ttl & ttlprefix) != 0x0) { // fast check: ttls in [0,31]
       continue;
     }
-    in->s_addr = next & 0x00FFFFFF;    // pick out 24 bits of network
+    in->s_addr = next32 & 0x00FFFFFF;    // pick out 24 bits of network
     host = (p[0] + p[1] + p[2]) & 0xFF;
     in->s_addr += (host << 24);
     return 1;
@@ -197,7 +200,7 @@ uint32_t IPList6::next_address_seq(struct in6_addr *in, uint8_t * ttl) {
 
 /* random next address */
 uint32_t IPList6::next_address_rand(struct in6_addr *in, uint8_t * ttl) {
-  static uint32_t next = 0;
+  static uint64_t next = 0;
 
   if (not seeded)
     seed();

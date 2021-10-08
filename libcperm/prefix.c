@@ -49,7 +49,7 @@ int perm_prefix_create(struct cperm_t* perm) {
 		return PERM_ERROR_NOMEM;
 	}
 
-	for(uint32_t i = 0; i < perm->range; i++) {
+	for(uint64_t i = 0; i < perm->range; i++) {
 		perm->cipher->enc(perm, i, &vect[i].ct);
 		vect[i].pt = i;
 	}
@@ -63,7 +63,7 @@ int perm_prefix_create(struct cperm_t* perm) {
 	return 0;
 }
 
-int perm_prefix_get(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
+int perm_prefix_get(struct cperm_t* perm, uint64_t pt, uint64_t* ct) {
 	struct prefix_data_t* prefix_data = perm->mode_data;
 
 	if(pt < perm->range) {
@@ -75,7 +75,7 @@ int perm_prefix_get(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
 	return PERM_ERROR_RANGE;
 }
 
-int perm_prefix_next(struct cperm_t* perm, uint32_t* ct) {
+int perm_prefix_next(struct cperm_t* perm, uint64_t* ct) {
 	struct prefix_data_t* prefix_data = perm->mode_data;
 
 	if(prefix_data->next < perm->range) {

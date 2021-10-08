@@ -68,7 +68,7 @@ typedef enum {	PERM_MODE_ERROR = -1,
 typedef enum {	PERM_CIPHER_ERROR = -1,
 				PERM_CIPHER_AUTO,			// Automatically select cipher to user (only RC5 is currently implemented)
 				PERM_CIPHER_RC5,			// Use the RC5 cipher
-				PERM_CIPHER_SPECK			// Use the Speck cipher
+				PERM_CIPHER_SPECK,			// Use the Speck cipher
 } PermCipher;
 
 struct ccperm_t;
@@ -91,7 +91,7 @@ extern int cperm_errno;
  *
  * @return Returns a pointer to @c cperm_t or error.
  */
-struct cperm_t* cperm_create(uint32_t range, PermMode m, PermCipher a, uint8_t* key, int key_len);
+struct cperm_t* cperm_create(uint64_t range, PermMode m, PermCipher a, uint8_t* key, int key_len);
 
 /**
  * @brief Destroy a permutation object.
@@ -116,7 +116,7 @@ int cperm_set_key(struct cperm_t* perm, const unsigned char* key, uint16_t lengt
  *
  * @return 0 on success or @c PERM_END when there are no more items in the permutation.
  */
-int cperm_next(struct cperm_t* p, uint32_t* ct);
+int cperm_next(struct cperm_t* p, uint64_t* ct);
 
 /**
  * @brief Encodes an index to its permuted value.
@@ -131,7 +131,7 @@ int cperm_next(struct cperm_t* p, uint32_t* ct);
  *
  * @return 0 on success or error code on failure.
  */
-int cperm_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct);
+int cperm_enc(struct cperm_t* perm, uint64_t pt, uint64_t* ct);
 
 /**
  * @brief Returns the error status of the last API function.
@@ -154,7 +154,7 @@ int cperm_get_last_error();
  *
  * @return Length of the permutation or 0 on error.
  */
-uint32_t cperm_get_range(const struct cperm_t* p);
+uint64_t cperm_get_range(const struct cperm_t* p);
 
 /**
  * @brief Returns the current position of a permutation object.
@@ -163,7 +163,7 @@ uint32_t cperm_get_range(const struct cperm_t* p);
  *
  * @return Current position of the permutation or 0 on error.
  */
-uint32_t cperm_get_position(const struct cperm_t* p);
+uint64_t cperm_get_position(const struct cperm_t* p);
 
 /**
  * @brief Resets the position of the permutation back to 0.

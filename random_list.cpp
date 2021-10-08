@@ -31,7 +31,7 @@ RandomSubnetList::seed() {
 uint32_t        
 RandomSubnetList::next_address(struct in_addr *in, uint8_t *ttl) {
     list < Subnet >::iterator iter;
-    uint32_t next;
+    uint64_t next;
     uint32_t subnet_count, current = 0;
     uint32_t addr, offset;
 
@@ -61,7 +61,7 @@ RandomSubnetList::next_address(struct in_addr *in, uint8_t *ttl) {
 uint32_t        
 RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
     list < Subnet6 >::iterator iter;
-    uint32_t next;
+    uint64_t next;
     uint32_t subnet_count, current = 0;
     uint32_t offset;
     uint64_t high, iid = 0;

@@ -27,13 +27,13 @@
 #include "cperm.h"
 
 struct cycle_data_t {
-	uint32_t next;
-	uint32_t count;
+	uint64_t next;
+	uint64_t count;
 };
 
 int perm_cycle_create(struct cperm_t* perm);
-int perm_cycle_get(struct cperm_t* perm, uint32_t pt, uint32_t* ct);
-int perm_cycle_next(struct cperm_t* perm, uint32_t* ct);
+int perm_cycle_get(struct cperm_t* perm, uint64_t pt, uint64_t* ct);
+int perm_cycle_next(struct cperm_t* perm, uint64_t* ct);
 int perm_cycle_destroy(struct cperm_t* perm);
 
 #endif /* CYCLE_H */

@@ -91,11 +91,11 @@ loop(YarrpConfig * config, TYPE * iplist, Traceroute * trace,
         if (config->bgpfile or config->blocklist) {
             if (config->ipv6) {
                 asn = (int *)tree->get(target6);
-                inet_ntop(AF_INET6, &target6, ptarg, INET6_ADDRSTRLEN);
             } else {
                 asn = (int *)tree->get(target.s_addr);
-                inet_ntop(AF_INET, &target, ptarg, INET6_ADDRSTRLEN);
             }
+            if (verbosity >= HIGH)
+                inet_ntop(AF_INET, &target, ptarg, INET6_ADDRSTRLEN);
             if (asn == NULL) {
                 debug(DEBUG, "BGP Skip: " << ptarg << " TTL: " << (int)ttl);
                 stats->bgp_outside++;

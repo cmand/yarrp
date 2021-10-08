@@ -39,7 +39,7 @@ struct rc5_data {
 
 int perm_rc5_create(struct cperm_t* pt);
 int perm_rc5_destroy(struct cperm_t* pt);
-int perm_rc5_enc(struct cperm_t* perm, uint32_t pt, uint32_t* ct);
-int perm_rc5_dec(struct cperm_t* perm, uint32_t ct, uint32_t* pt);
+int perm_rc5_enc(struct cperm_t* perm, uint64_t pt, uint64_t* ct);
+int perm_rc5_dec(struct cperm_t* perm, uint64_t ct, uint64_t* pt);
 
 #endif /* RC5_H */

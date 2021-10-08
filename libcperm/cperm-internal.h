@@ -28,13 +28,13 @@
 
 /* Permutation mode and cipher function definitions */
 typedef int (*ModeCreateFunc)(struct cperm_t*);
-typedef int (*ModeNextFunc)(struct cperm_t*, uint32_t*);
-typedef int (*ModeGetFunc)(struct cperm_t*, uint32_t, uint32_t*);
+typedef int (*ModeNextFunc)(struct cperm_t*, uint64_t*);
+typedef int (*ModeGetFunc)(struct cperm_t*, uint64_t, uint64_t*);
 typedef int (*ModeDestroyFunc)(struct cperm_t*);
 
 typedef int (*CipherCreateFunc)(struct cperm_t*);
-typedef int (*CipherEncFunc)(struct cperm_t*, uint32_t, uint32_t*);
-typedef int (*CipherDecFunc)(struct cperm_t*, uint32_t, uint32_t*);
+typedef int (*CipherEncFunc)(struct cperm_t*, uint64_t, uint64_t*);
+typedef int (*CipherDecFunc)(struct cperm_t*, uint64_t, uint64_t*);
 typedef int (*CipherDestroyFunc)(struct cperm_t*);
 
 /* libperm supports pluggable permutation modes and ciphers. They are defined by using
@@ -63,8 +63,8 @@ struct CipherFuncs {
 struct cperm_t {
 	uint8_t* key;					// Buffer containing the cipher key
 	uint16_t key_len;				// Length of the key
-	uint32_t range;					// Range (size) of the permutation
-	uint32_t position;				// Position of the permutation (i.e. how many values have been read)
+	uint64_t range;					// Range (size) of the permutation
+	uint64_t position;				// Position of the permutation (i.e. how many values have been read)
 	void* mode_data;				// Data specific to the permutation mode used
 	void* cipher_data;				// Data specific to the cipher used
 

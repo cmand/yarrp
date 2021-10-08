@@ -41,12 +41,12 @@ int perm_cycle_create(struct cperm_t* perm) {
 	return 0;
 }
 
-int perm_cycle_get(struct cperm_t* perm, uint32_t pt, uint32_t* ct) {
+int perm_cycle_get(struct cperm_t* perm, uint64_t pt, uint64_t* ct) {
 	cperm_errno = PERM_ERROR_OP_NOT_SUPP;
 	return PERM_ERROR_OP_NOT_SUPP;
 }
 
-int perm_cycle_next(struct cperm_t* perm, uint32_t* ct) {
+int perm_cycle_next(struct cperm_t* perm, uint64_t* ct) {
 	struct cycle_data_t* cycle_data = perm->mode_data;
 
 	if(cycle_data->count >= perm->range) {
