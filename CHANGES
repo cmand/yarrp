@@ -1,3 +1,11 @@
+yarrp-0.8
+---------
+* Fix memory leaks
+* IPv6 subnet probing
+* IPv6 blocklist support
+* Better BGP table support
+* Misc bug fixes
+
 yarrp-0.7
 ---------
 * Add IPv6 EH support
