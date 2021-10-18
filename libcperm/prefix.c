@@ -36,13 +36,13 @@ static int prefix_element_sort(const void* a, const void* b) {
 }
 
 int perm_prefix_create(struct cperm_t* perm) {
-	struct prefix_data_t* prefix_data = malloc(sizeof(*prefix_data));
+	struct prefix_data_t* prefix_data = calloc(1,sizeof(*prefix_data));
 	if(!prefix_data) {
 		cperm_errno = PERM_ERROR_NOMEM;
 		return PERM_ERROR_NOMEM;
 	}
 
-	struct prefix_element* vect = malloc(sizeof(struct prefix_element) * perm->range);
+	struct prefix_element* vect = calloc(perm->range, sizeof(struct prefix_element));
 	if(!vect) {
 		free(prefix_data);
 		cperm_errno = PERM_ERROR_NOMEM;

@@ -57,6 +57,7 @@ Traceroute6::Traceroute6(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
 }
 
 Traceroute6::~Traceroute6() {
+    if (config->testing) return;
     free(frame);
 }
 

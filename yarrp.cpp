@@ -326,8 +326,9 @@ main(int argc, char **argv) {
             stats->dump(stdout);
     }
     delete stats;
-    if (not config.testing)
-        delete trace;
+    delete trace;
+    if (tree)
+        delete tree;
     if (iplist)
         delete iplist;
     if (subnetlist)

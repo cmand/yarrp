@@ -7,6 +7,7 @@
 
 Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_config, _stats)
 {
+    if (config->testing) return;
     memset(&source, 0, sizeof(struct sockaddr_in)); 
     if (config->probesrc) {
         source.sin_family = AF_INET;
@@ -23,8 +24,6 @@ Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
     outip->ip_v = IPVERSION;
     outip->ip_hl = sizeof(struct ip) >> 2;
     outip->ip_src.s_addr = source.sin_addr.s_addr;
-    if (config->testing)
-       return;
     sndsock = raw_sock(&source);
     if (config->probe and config->receive) {
         lock();   /* grab mutex; make listener thread block. */
@@ -33,7 +32,8 @@ Traceroute4::Traceroute4(YarrpConfig *_config, Stats *_stats) : Traceroute(_conf
 }
 
 Traceroute4::~Traceroute4() {
-    free(outip);
+    if (outip)
+        free(outip);
 }
 
 void Traceroute4::probePrint(struct in_addr *targ, int ttl) {

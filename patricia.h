@@ -137,6 +137,9 @@ class Patricia {
     Patricia(uint8_t size) {
         tree = New_Patricia(size);
     };
+    ~Patricia() {
+        Destroy_Patricia(tree);
+    };
     template <typename Type> patricia_node_t *add_ref(const char *string, Type *val) {
         prefix_t *prefix = ascii2prefix(AF_INET, string);
         patricia_node_t *node = patricia_lookup(tree, prefix);
@@ -148,7 +151,6 @@ class Patricia {
         Deref_Prefix(prefix);
         return (node);
 	}
-    //template <typename Type> patricia_node_t *add(const char *string, Type *val);
     template <typename Type> patricia_node_t *add(int family, const char *string, Type *val) {
         size_t size = sizeof(*val);
         prefix_t *prefix = ascii2prefix(family, string);

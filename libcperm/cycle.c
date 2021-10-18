@@ -28,7 +28,7 @@
 #include "cycle.h"
 
 int perm_cycle_create(struct cperm_t* perm) {
-	struct cycle_data_t* cycle_data = malloc(sizeof(*cycle_data));
+	struct cycle_data_t* cycle_data = calloc(1,sizeof(*cycle_data));
 	if(!cycle_data) {
 		cperm_errno = PERM_ERROR_NOMEM;
 		return PERM_ERROR_NOMEM;

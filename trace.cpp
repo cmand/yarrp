@@ -5,7 +5,7 @@
 ****************************************************************************/
 #include "yarrp.h"
 
-Traceroute::Traceroute(YarrpConfig *_config, Stats *_stats) : config(_config), stats(_stats), tree(NULL)
+Traceroute::Traceroute(YarrpConfig *_config, Stats *_stats) : config(_config), stats(_stats), tree(NULL), recv_thread()
 {
     dstport = config->dstport;
     if (config->ttl_neighborhood)
