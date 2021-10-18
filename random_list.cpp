@@ -4,6 +4,7 @@
 RandomSubnetList::RandomSubnetList(uint8_t _maxttl, uint8_t _gran):SubnetList(_maxttl, _gran) {
     seeded = false;
     perm = NULL;
+    memset(key, 0, KEYLEN);
 }
 
 RandomSubnetList::~RandomSubnetList() {
@@ -13,14 +14,14 @@ RandomSubnetList::~RandomSubnetList() {
 
 void            
 RandomSubnetList::seed() {
-    uint8_t buffer[16];
     PermMode mode = PERM_MODE_CYCLE;
+    assert(addr_count > 0);
 
     if (addr_count < 500000) {
         mode = PERM_MODE_PREFIX;
     }
     //printf("%s: permsize: %d\n", __func__, addr_count);
-    perm = cperm_create(addr_count, mode, PERM_CIPHER_RC5, buffer, 16);
+    perm = cperm_create(addr_count, mode, PERM_CIPHER_RC5, key, 16);
     if (!perm) {
         printf("Failed to initialize permutation of size %u. Code: %d\n", addr_count, cperm_get_last_error());
         exit(1);
