@@ -89,11 +89,13 @@ RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
             (*in).s6_addr32[0] += htonl( (high & 0xFFFFFFFF00000000) >> 32);
             (*in).s6_addr32[1] += htonl( (high & 0x00000000FFFFFFFF));
 
+#if 0
             iid = rndIID((uint32_t *)in);
             (*in).s6_addr32[2] += htonl( (iid & 0xFFFFFFFF00000000) >> 32);
             (*in).s6_addr32[3] += htonl( (iid & 0x00000000FFFFFFFF));
-
-            //(*in).s6_addr32[3] = htons(1);
+#else
+            (*in).s6_addr32[3] = htonl(1);
+#endif
             return 1;
         }
         current += subnet_count;
