@@ -62,10 +62,10 @@ Traceroute6::~Traceroute6() {
 
 void Traceroute6::probePrint(struct in6_addr addr, int ttl) {
     uint32_t diff = elapsed();
-    inet_ntop(AF_INET6, &source6.sin6_addr, addrstr, INET6_ADDRSTRLEN);
-    if (config->probesrc)
+    if (config->probesrc) {
+        inet_ntop(AF_INET6, &source6.sin6_addr, addrstr, INET6_ADDRSTRLEN);
         cout << addrstr << " -> ";
-    //inet_ntop(AF_INET6, &(outip->ip6_dst), addrstr, INET6_ADDRSTRLEN);
+    }
     inet_ntop(AF_INET6, &addr, addrstr, INET6_ADDRSTRLEN);
     cout << addrstr << " ttl: " << ttl << " t=" << diff;
     (config->coarse) ? cout << "ms" << endl : cout << "us" << endl;

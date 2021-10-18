@@ -61,9 +61,9 @@ RandomSubnetList::next_address(struct in_addr *in, uint8_t *ttl) {
 uint32_t        
 RandomSubnetList::next_address(struct in6_addr *in, uint8_t * ttl) {
     list < Subnet6 >::iterator iter;
-    uint64_t next;
+    uint64_t next = 0;
     uint32_t subnet_count, current = 0;
-    uint32_t offset;
+    uint32_t offset = 0;
     uint64_t high, iid = 0;
 
     if (!seeded)
