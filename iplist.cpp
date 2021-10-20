@@ -78,7 +78,7 @@ void IPList4::read(std::istream& inlist) {
     if (!line.empty() && line[line.size() - 1] == '\r')
       line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
     if (inet_aton(line.c_str(), &addr) != 1)
-      fatal("** Couldn't parse IPv4 address: %s", line.c_str());
+      fatal("Couldn't parse IPv4 address: %s", line.c_str());
     targets.push_back(addr.s_addr);
   }
   debug(LOW, ">> IPv4 targets: " << targets.size());
@@ -92,7 +92,7 @@ void IPList6::read(std::istream& inlist) {
     if (!line.empty() && line[line.size() - 1] == '\r')
       line.erase( std::remove(line.begin(), line.end(), '\r'), line.end() );
     if (inet_pton(AF_INET6, line.c_str(), &addr) != 1)
-      fatal("** Couldn't parse IPv6 address: %s", line.c_str());
+      fatal("Couldn't parse IPv6 address: %s", line.c_str());
     targets.push_back(addr);
   }  
   debug(LOW, ">> IPv6 targets: " << targets.size());

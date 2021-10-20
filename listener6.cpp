@@ -60,6 +60,19 @@ void *listener6(void *args) {
     if ((rcvsock = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL))) < 0) {
         cerr << "yarrp listener socket error:" << strerror(errno) << endl;
     }
+
+    /* bind PF_PACKET to single interface */
+    struct ifreq ifr;
+    strncpy(ifr.ifr_name, trace->config->int_name, IFNAMSIZ);
+    if (ioctl(rcvsock, SIOCGIFINDEX, &ifr) < 0) fatal ("ioctl err");;
+    struct sockaddr_ll sll;
+    memset(&sll, 0, sizeof(sll));
+    sll.sll_family = PF_PACKET;
+    sll.sll_protocol = htons(ETH_P_ALL);
+    sll.sll_ifindex = ifr.ifr_ifindex;
+    if (bind(rcvsock, (struct sockaddr*) &sll, sizeof(sll)) < 0) {
+        fatal("Bind to PF_PACKET socket");
+    }
 #else
     /* Init BPF */
     size_t blen = 0;
