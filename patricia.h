@@ -7,7 +7,7 @@
 typedef void (*void_fn_t)();
 /* { from defs.h */
 #define prefix_touchar(prefix) ((u_char *)&(prefix)->add.sin)
-#define MAXLINE 1024
+#define MAXLINE 4096
 #define BIT_TEST(f, b)  ((f) & (b))
 /* } */
 
