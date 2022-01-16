@@ -4,6 +4,7 @@
  * Includes oftware developed by the University of Michigan,
  * Merit Network, Inc., and their contributors.
  */
+#include <algorithm> /* remove_if */
 #include <assert.h> /* assert */
 #include <ctype.h> /* isdigit */
 #include <errno.h> /* errno */
