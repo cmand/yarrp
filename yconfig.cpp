@@ -35,7 +35,7 @@ static struct option long_options[] = {
     {"testing", no_argument, NULL, 'T'},
     {"instance", required_argument, NULL, 'E'}, 
     {"granularity", required_argument, NULL, 'g'},
-    {"v6eh", no_argument, NULL, 'X'}, 
+    {"v6eh", required_argument, NULL, 'X'}, 
     {"version", no_argument, NULL, 'V'}, 
     {NULL, 0, NULL, 0},
 };
