@@ -107,19 +107,26 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
         /* Finally, does this ICMP packet have an extension (RFC4884)? */
         length = (ntohl(icmp->icmp_void) & 0x00FF0000) >> 16;
         length *= 4;
-        if ( (length > 0) and (replysize > length+8) ) {
+        if (replysize >= 168) {
             //printf("*** ICMP Extension %d/%d\n", length, replysize);
             ptr = (unsigned char *) icmp;
             ptr += length+8;
             if (length < 128) 
                 ptr += (128-length);
-            // ptr at start of ICMP extension
-            ptr += 4;
-            // ptr at start of MPLS stack header
-            ptr += 2;
+            icmp_extension_t *eh = (icmp_extension_t *) ptr;
+            //printf("*** ICMP Extension ver: %d length: %d checksum: %x\n", eh->ver, ntohs(eh->len), ntohs(eh->cksum));
+            uint16_t save_cksum = eh->cksum;
+            eh->cksum = 0x0000;
+            uint16_t ss = in_cksum((unsigned short *)ptr, ntohs(eh->len)+4);
+            //printf("*** ICMP computed checksum: %x\n", ntohs(ss));
+            eh->cksum = save_cksum;
+            if (ss != eh->cksum) {
+                cerr << "** ICMP extension checksum mismatch" << endl;
+                return;
+            }
             // is this a class/type 1/1 (MPLS)?
-            if ( (*ptr == 0x01) and (*(ptr+1) == 0x01) ) {
-                ptr += 2;
+            if ( (eh->c_num == 1) and (eh->c_type == 1) ) {
+                ptr += 8;
                 uint32_t *tmp;
                 mpls_label_t *lse = (mpls_label_t *) calloc(1, sizeof(mpls_label_t) );
                 mpls_stack = lse;

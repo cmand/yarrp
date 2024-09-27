@@ -6,6 +6,15 @@ typedef struct mpls_label {
 } mpls_label_t;
 #define MAX_MPLS_STACK_HEIGHT 4
 
+typedef struct icmp_extension {
+    uint8_t ver:4;
+    uint16_t reserved:12;
+    uint16_t cksum;
+    uint16_t len;
+    uint8_t c_num;
+    uint8_t c_type;
+} icmp_extension_t;
+
 class ICMP {
     public:
     ICMP();

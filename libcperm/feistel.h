@@ -24,7 +24,7 @@
 #define FEISTEL_H
 
 #include <stdint.h>
-#include "perm.h"
+#include "cperm.h"
 
 struct feistel_data_t {
 	uint32_t next;
