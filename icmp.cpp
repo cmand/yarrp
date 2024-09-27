@@ -68,7 +68,7 @@ ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): 
         else if (quote->ip_p == IPPROTO_UDP) {
             struct udphdr *udp = (struct udphdr *) (ptr + 8 + (quote->ip_hl << 2));
             /* recover timestamp from UDP.check and UDP.payloadlen */
-            int payloadlen = ntohs(udp->uh_ulen) - sizeof(struct icmp);
+            int payloadlen = ntohs(udp->uh_ulen) - sizeof(struct udphdr);
             int timestamp = udp->uh_sum;
             sport = ntohs(udp->uh_sport);
             dport = ntohs(udp->uh_dport);
