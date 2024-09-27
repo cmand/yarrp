@@ -13,6 +13,15 @@ ICMP::ICMP() :
     mpls_stack = NULL;
 }
 
+ICMP::~ICMP() {
+    mpls_label_t *head = mpls_stack;
+    while (head) {
+        mpls_label_t *tmp = head;
+        head = head->next;
+        free(tmp);
+    }
+}
+
 ICMP4::ICMP4(struct ip *ip, struct icmp *icmp, uint32_t elapsed, bool _coarse): ICMP()
 {
     coarse = _coarse;

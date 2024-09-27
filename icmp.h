@@ -9,6 +9,7 @@ typedef struct mpls_label {
 class ICMP {
     public:
     ICMP();
+    ~ICMP();
     virtual void print() {};
     virtual void write(FILE **, uint32_t) {};
     virtual uint32_t getSrc() { return 0; };
