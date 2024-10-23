@@ -101,13 +101,15 @@ void *listener6(void *args) {
             fatal("select error");
         }
         nullreads = 0;
+        memset(buf, 0, PKTSIZE);
         len = recv(rcvsock, buf, PKTSIZE, 0); 
 #else
+        memset(bpfbuf, 0, blen);
         len = read(rcvsock, bpfbuf, blen);
-	unsigned char *p = bpfbuf;
+        unsigned char *p = bpfbuf;
 reloop:
         bh = (struct bpf_hdr *)p;
-	buf = p + bh->bh_hdrlen;  /* realign buf */
+        buf = p + bh->bh_hdrlen;  /* realign buf */
 #endif
         if (len == -1) {
             fatal("%s %s", __func__, strerror(errno));

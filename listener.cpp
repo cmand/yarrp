@@ -51,6 +51,7 @@ listener(void *args) {
         }
         if (n > 0) {
             nullreads = 0;
+            memset(buf, 0, PKTSIZE);
             len = recv(rcvsock, buf, PKTSIZE, 0);
             if (len == -1) {
                 cerr << ">> Listener: read error: " << strerror(errno) << endl;
