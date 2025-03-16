@@ -125,6 +125,12 @@ reloop:
                 if (icmp->is_yarrp) {
                     if (verbosity > LOW)
                         icmp->print();
+                    if (icmp->getInstance() != trace->config->instance) {
+                        if (verbosity > HIGH)
+                            cerr << ">> Listener: packet instance mismatch." << endl;
+                        delete icmp;
+                        continue;
+                    }
                     /* Fill mode logic. */
                     if (trace->config->fillmode) {
                         if ( (icmp->getTTL() >= trace->config->maxttl) and
