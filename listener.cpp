@@ -78,7 +78,10 @@ listener(void *args) {
                     if ( (icmp->getTTL() >= trace->config->maxttl) and
                          (icmp->getTTL() <= trace->config->fillmode) ) {
                         trace->stats->fills+=1;
-                        trace->probe(icmp->quoteDst(), icmp->getTTL() + 1); 
+                        uint32_t dst_ip = icmp->quoteDst();
+                        if (dst_ip != 0) {
+                            trace->probe(icmp->quoteDst(), icmp->getTTL() + 1); 
+                        }
                     }
                 }
                 icmp->write(&(trace->config->out), trace->stats->count);
