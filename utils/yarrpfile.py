@@ -60,24 +60,24 @@ class Yarrp:
   def open(self):
     # try reading as a bz2 file
     try:
-      self.fd = bz2.BZ2File(self.yarrpfile, 'rb')
+      self.fd = bz2.BZ2File(self.yarrpfile, 'r')
       self.fd.read(1)
-      self.fd = bz2.BZ2File(self.yarrpfile, 'rb')
+      self.fd = bz2.BZ2File(self.yarrpfile, 'r')
       return
-    except IOError, e:
+    except IOError as e:
       pass
     # try reading as a gzip file
     try:
-      self.fd = gzip.open(self.yarrpfile, 'rb')
+      self.fd = gzip.open(self.yarrpfile, 'r')
       self.fd.read(1)
-      self.fd = gzip.open(self.yarrpfile, 'rb')
+      self.fd = gzip.open(self.yarrpfile, 'r')
       return
-    except IOError, e:
+    except IOError as e:
       pass
     # try reading as uncompressed
-    self.fd = open(self.yarrpfile, 'rb')
+    self.fd = open(self.yarrpfile, 'r')
 
-  def next(self):
+  def __next__(self):
     assert(self.fd)  
     line = self.fd.readline()
     if len(line) == 0:
@@ -105,11 +105,11 @@ class Yarrp:
           self.fills = int(value)
         if key == 'Pkts':
           self.packets = int(value)
-      except Exception, e:
-        print "Error (next):", e 
-        print "line:", line
+      except Exception as e:
+        print("Error (next):", e) 
+        print("line:", line)
         pass
-      return self.next()
+      return next(self)
     fields = line.strip().split()
     r = dict()
     if not self.columns: self.columns = len(fields)
@@ -117,20 +117,20 @@ class Yarrp:
       return False
     try:
       # new format
-      if self.columns == 14:
+      if self.columns == 15:
           (r['target'], r['sec'], r['usec'], r['typ'], r['code'], 
            r['ttl'], r['hop'], r['rtt'], r['ipid'], r['psize'], 
-           r['rsize'], r['rttl'], r['rtos'], r['count']) = fields
+           r['rsize'], r['rttl'], r['rtos'], r['mpls'], r['count']) = fields
       for field in ['sec', 'usec', 'typ', 'code', 'ttl', 'rttl', 'rtt', 'psize', 'rsize', 'ipid', 'rtos']:
         r[field] = int(r[field])
       if 'count' in r:
         r['count'] = int(r['count'])
       # Ugh, occassionally the recorded rtt is impossible...
       rtt = r['rtt']
-      if self.us_granularity == True: 
-        rtt = rtt/1000.0
+      if self.us_granularity == False: 
+        rtt = rtt*1000.0
       if rtt < 0 or rtt > 4294967295: rtt = 0
-      r['rtt'] = rtt
-    except ValueError, e:
-      print "ERR:", e, ":", line, "expecting:", self.columns
+      r['rtt'] = int(rtt)
+    except ValueError as e:
+      print("ERR:", e, ":", line, "expecting:", self.columns)
     return r

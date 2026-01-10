@@ -53,7 +53,7 @@ def is_ipv6(addr):
   try: 
     socket.inet_pton(socket.AF_INET, addr)
     return False
-  except socket.error, e:
+  except socket.error as e:
     return True
 
 def pack_referenced_address(addrid):
@@ -72,14 +72,14 @@ def pack_unreferenced_address(addr):
 
 def pack_timestamp(val):
   sec = int(val)
-  usec = (val - sec) * 1000000.0
+  usec = int((val - sec) * 1000000.0)
   buf = pack_uint32_t(sec) + pack_uint32_t(usec)
   return buf
 
 class WartsBaseObject(object):
   def __init__(self, objtype=obj_type['NONE']):
     self.typ = objtype
-    self.buf = ""
+    self.buf = b""
     self.setflags = dict()
     self.referenced_addresses = dict()
     self.last_referenced_address_id = -1
@@ -106,7 +106,7 @@ class WartsBaseObject(object):
     self.last_referenced_address_id = _last_referenced_address_id
 
   def reset(self):
-    self.buf = ""
+    self.buf = b""
     self.setflags = dict()
     self.referenced_addresses = dict()
     self.last_referenced_address_id = -1
@@ -129,24 +129,24 @@ class WartsBaseObject(object):
     num_flag_bytes = int(ceil(len(self.flags) / 7.0))
     #print "flag bytes:", num_flag_bytes
     flags = [0]*num_flag_bytes
-    flag_buffer = ""
+    flag_buffer = b""
     for i in range(num_flag_bytes-1):
       flags[i] = 0x80
     for num, flag in enumerate(self.flags):
       (flag_name, flag_method) = flag
+      #print("flag method:", flag_name, "method:", flag_method)
       if flag_name in self.setflags:
-        block = num / 7
+        block = int(num / 7)
         flags[block] += 2**(num % 7) 
         try:
           b = flag_method(self.setflags[flag_name])
-        except Exception, e:
-          print "threw:", e, "on:", flag_name, "using:", flag_method
+        except Exception as e:
+          print("threw:", e, "on:", flag_name, "using:", flag_method, "val:", self.setflags[flag_name])
           exit(-1)
-        hb = [hex(ord(z)) for z in b]
-        #print "Writing Flag:", num, "name:", flag_name, "value:", self.setflags[flag_name], "bytes:", hb
+        hb = [hex(z) for z in b]
+        #print("Writing Flag:", num, "name:", flag_name, "value:", self.setflags[flag_name], "bytes:", hb)
         flag_buffer += b
     for b in flags:
-      #print "Flag Byte:", hex(b)
       self.buf += pack_uint8_t(b)
     self.buf += pack_uint16_t(len(flag_buffer))
     self.buf += flag_buffer
@@ -312,7 +312,7 @@ class WartsWriter():
 
   @staticmethod 
   def append_string(buf, s):
-    return buf + s + '\0'
+    return buf + (s+'\0').encode("utf-8") 
  
   @staticmethod 
   def make_header(obj):

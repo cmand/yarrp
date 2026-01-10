@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright (c) 2016-2018, Robert Beverly
 # All rights reserved.
@@ -41,7 +41,7 @@ from yarrpfile import Yarrp
 try:
   from sc_warts_writer import WartsWriter, WartsTrace
 except:
-  print "Requires sc_warts_writer.py from https://github.com/cmand/scamper/"
+  print("Requires sc_warts_writer.py from https://github.com/cmand/scamper/")
   sys.exit(-1)
 
 try:
@@ -62,7 +62,7 @@ def yarrp_proc(yarrpfile, traces, timestamps, subnet=None):
  
   yarrp = Yarrp(yarrpfile)
   while True:
-    result = yarrp.next()
+    result = next(yarrp)
     if not result: break
     if not inNet(result['target'], net, mask):
       continue
@@ -93,19 +93,19 @@ def make_hops_nbr(hops, G):
   first_nbr_hop = None
   if G.has_node(hops[minttl][2]):
     first_nbr_hop = hops[minttl][2]
-    print "Found path to TTL=min node."
+    print("Found path to TTL=min node.")
   if 8 in hops:
     if G.has_node(hops[8][2]):
       first_nbr_hop = hops[8][2]
-      print "Found path to TTL=8 node."
+      print("Found path to TTL=8 node.")
 
   if first_nbr_hop:
-    print "computing shortest path to:", first_nbr_hop
+    print("computing shortest path to:", first_nbr_hop)
     try:
       path = nx.shortest_path(G, source='src', target=first_nbr_hop)
-      print "got path:", path
-    except nx.NetworkXNoPath, e:
-      print e
+      print("got path:", path)
+    except nx.NetworkXNoPath as e:
+      print(e)
   return (path, maxttl)
 
 def dottedQuadToNum(ip):
@@ -152,7 +152,7 @@ def main():
   args = parser.parse_args()
 
   if args.neighborhood:
-    print "Reconstructing neighborhood"
+    print("Reconstructing neighborhood")
     G = construct_nbrhood(args.neighborhood)
   
   # read and collect yarrp results into:
@@ -166,7 +166,7 @@ def main():
   w.write_list(1, 1, 'yarrp')
   w.write_cycle(1, 1, 1, int(t_min))
   processed = 0
-  print ">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+  print(">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
   tr = WartsTrace()
 
   # write each collected trace
@@ -199,8 +199,8 @@ def main():
 
   # finish
   w.write_cycle_stop(1, int(t_max))
-  print ">> Processed: %d targets" % processed
-  print ">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')
+  print(">> Processed: %d targets" % processed)
+  print(">>", datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))
 
 if __name__ == "__main__":
   main()
